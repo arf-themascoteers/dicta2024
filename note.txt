@@ -11,6 +11,9 @@ v7 - higher l1
 v8 - fc
 v9 - stricter threshold
 
+v10 - sticktest threshold
+v11 - nothreshold
+
 =========
 v1 - fc
 v2 - sigmoid
