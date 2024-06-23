@@ -1,7 +1,7 @@
 v1 - fc
 v2 - sigmoid
 v3 - full batch
-
+v4 - mean
 
 ======
 v1 - mean

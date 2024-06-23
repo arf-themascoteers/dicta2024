@@ -65,7 +65,7 @@ class Algorithm_v4(Algorithm):
     def get_selected_indices(self):
         optimizer = torch.optim.Adam(self.zhangnet.parameters(), lr=0.001, betas=(0.9,0.999))
         dataset = TensorDataset(self.X_train, self.y_train)
-        dataloader = DataLoader(dataset, batch_size=128, shuffle=True)
+        dataloader = DataLoader(dataset, batch_size=128000, shuffle=True)
         channel_weights = None
         loss = 0
         l1_loss = 0
@@ -76,7 +76,7 @@ class Algorithm_v4(Algorithm):
             for batch_idx, (X, y) in enumerate(dataloader):
                 optimizer.zero_grad()
                 channel_weights, sparse_weights, y_hat = self.zhangnet(X)
-                deciding_weights = sparse_weights
+                deciding_weights = channel_weights
                 mean_weight, all_bands, selected_bands = self.get_indices(deciding_weights)
                 self.set_all_indices(all_bands)
                 self.set_selected_indices(selected_bands)
@@ -158,7 +158,7 @@ class Algorithm_v4(Algorithm):
         return m
 
     def get_lambda(self, epoch):
-        return 0.0001
+        return 0.0001 * math.exp(-epoch/self.total_epoch)
 
 
 
