@@ -2,11 +2,14 @@ v0 - zhang
 v1 - mean batch
 v2 - full batch
 v3 - mean
-v4 - sigmoid
 
+v4 - sigmoid
 v5 - epoch
 v6 - uniform l1
 v7 - higher l1
+
+v8 - fc
+v9 - stricter threshold
 
 =========
 v1 - fc
