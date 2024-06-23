@@ -10,3 +10,7 @@ mini batch
 
 (smaller BAM?)
 (higher epoch)
+
+====
+
+v1 - fc
