@@ -4,6 +4,10 @@ v2 - full batch
 v3 - mean
 v4 - sigmoid
 
+v5 - epoch
+v6 - uniform l1
+v7 - higher l1
+
 =========
 v1 - fc
 v2 - sigmoid
