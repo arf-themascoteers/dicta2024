@@ -73,4 +73,21 @@ def plot_oak(source):
 
 
 if __name__ == "__main__":
-    plot_oak(["saved/15/15_summary.csv", "saved/16/16_summary.csv","results/17_summary.csv"])
+    # plot_oak(["saved/zhang_and_14_10f/zhang_14_summary.csv","saved/nosig18_ig_10f/18_only_summary.csv",
+    #           "saved/mlw_r_single_10/single_only_summary.csv","saved/mlw_r_single_10/multi_only_summary.csv",
+    #           "saved/mlwrig_nol2_10f/mlwrig_nol2_summary.csv"
+    #           ])
+
+    # plot_oak(["saved/zhang_and_14_10f/zhang_14_summary.csv",
+    #           "saved/mlw_r_single_10/multi_only_summary.csv",
+    #           "saved/mlwrig_nol2_10f/mlwrig_nol2_summary.csv"
+    #           ])
+
+    # plot_oak(["saved/zhang_and_14_10f/zhang_14_summary.csv",
+    #           "saved/mlwrig_nol2_10f/mlwrig_nol2_summary.csv",
+    #           "results/mlwrig_summary.csv"
+    #           ])
+
+    plot_oak([
+        "results/mlwrig_summary.csv"
+              ])
