@@ -1,6 +1,6 @@
 v1 - fc
 v2 - sigmoid
-v3 - mean
+v3 - full batch
 
 
 ======
