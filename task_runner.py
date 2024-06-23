@@ -32,6 +32,7 @@ class TaskRunner:
                         algorithm_object = Algorithm.create(algorithm, target_size, splits, self.tag, self.reporter, self.verbose, fold)
                         self.process_a_case(algorithm_object, fold)
 
+        self.reporter.save_results()
         return self.reporter.get_summary(), self.reporter.get_details()
 
     def process_a_case(self, algorithm:Algorithm, fold):

@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from metrics import Metrics
 import torch
+import shutil
 
 
 class Reporter:
@@ -10,6 +11,7 @@ class Reporter:
         self.skip_all_bands = skip_all_bands
         self.summary_filename = f"{tag}_summary.csv"
         self.details_filename = f"{tag}_details.csv"
+        self.save_dir = f"saved_results/{tag}"
         self.summary_file = os.path.join("results", self.summary_filename)
         self.details_file = os.path.join("results", self.details_filename)
 
@@ -133,6 +135,14 @@ class Reporter:
             return None, None, None
         row = rows.iloc[0]
         return row["oa"], row["aa"], row["k"]
+
+    def save_results(self):
+        os.makedirs(self.save_dir, exist_ok=True)
+        for filename in os.listdir("results"):
+            if filename.startswith(f"{self.tag}_"):
+                source_file = os.path.join("results", filename)
+                if os.path.isfile(source_file):
+                    shutil.copy(source_file, self.save_dir)
 
     @staticmethod
     def sanitize_metric(metric):
