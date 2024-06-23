@@ -164,7 +164,7 @@ class Algorithm_zhang(Algorithm):
 
     def l1_loss(self, channel_weights):
         if len(channel_weights.shape) > 1:
-            channel_weights = torch.sum(channel_weights, dim=1)
+            channel_weights = torch.sum(torch.abs(channel_weights), dim=1)
         m = torch.mean(channel_weights)
         return m
 
