@@ -44,7 +44,6 @@ class ZhangNet(nn.Module):
         channel_weights = torch.mean(channel_weights, dim=0)
         sparse_weights = self.sparse(channel_weights)
         reweight_out = X * sparse_weights
-        reweight_out = reweight_out.reshape(reweight_out.shape[0],1,reweight_out.shape[1])
         output = self.classnet(reweight_out)
         return channel_weights, sparse_weights, output
 
