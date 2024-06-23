@@ -32,9 +32,19 @@ class ZhangNet(nn.Module):
             nn.Sigmoid()
         )
         self.classnet = nn.Sequential(
-            nn.Linear(self.bands, 200),
-            nn.LeakyReLU(),
-            nn.Linear(200, self.number_of_classes),
+            nn.Conv1d(1,16,kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm1d(16),
+            nn.ReLU(),
+            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
+            nn.Conv1d(16, 8, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm1d(8),
+            nn.ReLU(),
+            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
+            nn.Conv1d(8, 4, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm1d(4),
+            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
+            nn.Flatten(start_dim=1),
+            nn.Linear(last_layer_input,self.number_of_classes)
         )
         self.sparse = Sparse()
         num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
@@ -44,6 +54,7 @@ class ZhangNet(nn.Module):
         channel_weights = self.weighter(X)
         sparse_weights = self.sparse(channel_weights)
         reweight_out = X * sparse_weights
+        reweight_out = reweight_out.reshape(reweight_out.shape[0],1,reweight_out.shape[1])
         output = self.classnet(reweight_out)
         return channel_weights, sparse_weights, output
 
@@ -65,7 +76,7 @@ class Algorithm_v1(Algorithm):
     def get_selected_indices(self):
         optimizer = torch.optim.Adam(self.zhangnet.parameters(), lr=0.001, betas=(0.9,0.999))
         dataset = TensorDataset(self.X_train, self.y_train)
-        dataloader = DataLoader(dataset, batch_size=128, shuffle=True)
+        dataloader = DataLoader(dataset, batch_size=128000, shuffle=True)
         channel_weights = None
         loss = 0
         l1_loss = 0
