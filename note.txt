@@ -1,6 +1,7 @@
 v0 - zhang
 v1 - mean batch
 v2 - full batch
+v3 - mean
 
 =========
 v1 - fc
