@@ -164,7 +164,8 @@ class Algorithm_v1(Algorithm):
         return mean_weights, band_indx, band_indx[: self.target_size]
 
     def l1_loss(self, channel_weights):
-        channel_weights = torch.sum(channel_weights, dim=1)
+        if len(channel_weights.shape) > 1:
+            channel_weights = torch.sum(channel_weights, dim=1)
         m = torch.mean(channel_weights)
         return m
 
