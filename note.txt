@@ -1,1 +1,8 @@
 v1 - mean
+v2 - sigmoid (threshold)
+
+fc
+mini batch
+uniform l
+(smaller BAM?)
+(higher epoch)
