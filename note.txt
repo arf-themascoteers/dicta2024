@@ -1,3 +1,6 @@
+V1 - MEAN batch
+
+=========
 v1 - fc
 v2 - sigmoid
 v3 - full batch
