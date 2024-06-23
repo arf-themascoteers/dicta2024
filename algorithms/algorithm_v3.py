@@ -31,9 +31,19 @@ class ZhangNet(nn.Module):
             nn.Linear(512, self.bands)
         )
         self.classnet = nn.Sequential(
-            nn.Linear(self.bands, 200),
-            nn.LeakyReLU(),
-            nn.Linear(200, self.number_of_classes),
+            nn.Conv1d(1,16,kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm1d(16),
+            nn.ReLU(),
+            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
+            nn.Conv1d(16, 8, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm1d(8),
+            nn.ReLU(),
+            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
+            nn.Conv1d(8, 4, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm1d(4),
+            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
+            nn.Flatten(start_dim=1),
+            nn.Linear(last_layer_input,self.number_of_classes)
         )
         self.sparse = Sparse()
         num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
@@ -41,8 +51,10 @@ class ZhangNet(nn.Module):
 
     def forward(self, X):
         channel_weights = self.weighter(X)
+        channel_weights = torch.mean(channel_weights, dim=0)
         sparse_weights = self.sparse(channel_weights)
         reweight_out = X * sparse_weights
+        reweight_out = reweight_out.reshape(reweight_out.shape[0],1,reweight_out.shape[1])
         output = self.classnet(reweight_out)
         return channel_weights, sparse_weights, output
 
@@ -60,11 +72,24 @@ class Algorithm_v3(Algorithm):
         self.y_train = torch.tensor(self.splits.train_y, dtype=torch.int32).to(self.device)
         self.X_val = torch.tensor(self.splits.validation_x, dtype=torch.float32).to(self.device)
         self.y_val = torch.tensor(self.splits.validation_y, dtype=torch.int32).to(self.device)
+        self.saved_weights = None
+        self.count_saved_weights = 0
+
+    def reset_saved_weights(self):
+        self.saved_weights = None
+        self.count_saved_weights = 0
+
+    def add_saved_weights(self, weights):
+        if self.count_saved_weights == 0:
+            self.saved_weights = weights
+        else:
+            self.saved_weights = ((self.saved_weights * self.count_saved_weights) + weights) / (
+                        self.count_saved_weights + 1)
 
     def get_selected_indices(self):
         optimizer = torch.optim.Adam(self.zhangnet.parameters(), lr=0.001, betas=(0.9,0.999))
         dataset = TensorDataset(self.X_train, self.y_train)
-        dataloader = DataLoader(dataset, batch_size=128000, shuffle=True)
+        dataloader = DataLoader(dataset, batch_size=128, shuffle=True)
         channel_weights = None
         loss = 0
         l1_loss = 0
@@ -72,11 +97,13 @@ class Algorithm_v3(Algorithm):
 
         for epoch in range(self.total_epoch):
             self.epoch = epoch
+            self.reset_saved_weights()
             for batch_idx, (X, y) in enumerate(dataloader):
                 optimizer.zero_grad()
                 channel_weights, sparse_weights, y_hat = self.zhangnet(X)
                 deciding_weights = channel_weights
-                mean_weight, all_bands, selected_bands = self.get_indices(deciding_weights)
+                self.add_saved_weights(deciding_weights)
+                mean_weight, all_bands, selected_bands = self.get_indices()
                 self.set_all_indices(all_bands)
                 self.set_selected_indices(selected_bands)
                 self.set_weights(mean_weight)
@@ -126,7 +153,7 @@ class Algorithm_v3(Algorithm):
         l0_cw = torch.norm(mean_weight, p=0).item()
         l0_s = torch.norm(means_sparse, p=0).item()
 
-        mean_weight, all_bands, selected_bands = self.get_indices(channel_weights)
+        mean_weight, all_bands, selected_bands = self.get_indices()
 
         oa, aa, k = train_test_evaluator.evaluate_split(self.splits, self)
         self.reporter.report_epoch(epoch, mse_loss, l1_loss, lambda1, l2_loss,lambda2,loss,
@@ -138,8 +165,8 @@ class Algorithm_v3(Algorithm):
                                    l0_cw, l0_s,
                                    selected_bands, means_sparse)
 
-    def get_indices(self, deciding_weights):
-        mean_weights = deciding_weights
+    def get_indices(self):
+        mean_weights = self.saved_weights
         if len(mean_weights.shape) > 1:
             mean_weights = torch.mean(mean_weights, dim=0)
 
