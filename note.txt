@@ -1,9 +1,12 @@
 v1 - mean
 v2 - sigmoid (threshold)
 v3 - fc
+v4 - uniform l
+
+(higher l1)?
 
 mini batch
-uniform l
+
 
 (smaller BAM?)
 (higher epoch)
