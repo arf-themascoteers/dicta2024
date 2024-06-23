@@ -2,7 +2,6 @@ v1 - mean
 v2 - sigmoid (threshold)
 v3 - fc
 
-fc
 mini batch
 uniform l
 
