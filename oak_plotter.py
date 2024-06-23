@@ -73,21 +73,11 @@ def plot_oak(source):
 
 
 if __name__ == "__main__":
-    # plot_oak(["saved/zhang_and_14_10f/zhang_14_summary.csv","saved/nosig18_ig_10f/18_only_summary.csv",
-    #           "saved/mlw_r_single_10/single_only_summary.csv","saved/mlw_r_single_10/multi_only_summary.csv",
-    #           "saved/mlwrig_nol2_10f/mlwrig_nol2_summary.csv"
-    #           ])
-
-    # plot_oak(["saved/zhang_and_14_10f/zhang_14_summary.csv",
-    #           "saved/mlw_r_single_10/multi_only_summary.csv",
-    #           "saved/mlwrig_nol2_10f/mlwrig_nol2_summary.csv"
-    #           ])
-
-    # plot_oak(["saved/zhang_and_14_10f/zhang_14_summary.csv",
-    #           "saved/mlwrig_nol2_10f/mlwrig_nol2_summary.csv",
-    #           "results/mlwrig_summary.csv"
-    #           ])
-
-    plot_oak([
-        "results/mlwrig_summary.csv"
-              ])
+    files = []
+    for d in os.listdir("saved_results"):
+        dpath = os.path.join("saved_results",d)
+        for f in os.listdir(dpath):
+            if f.endswith("_summary.csv") and not f.startswith("all_"):
+                fpath = os.path.join("saved_results",d,f)
+                files.append(fpath)
+    plot_oak(files)
