@@ -8,6 +8,12 @@ v6 - uniform l1
 v7 - higher l1
 v8 - stricter threshold
 
+(no sparse at some point?)
+(parallel net to avoid diminish?)
+(zhang2 epoch)
+
+next v1 - fullbatch
+- if fail v1 - sigmoid
 ======
 v1 - mean
 v2 - sigmoid (threshold)
