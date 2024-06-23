@@ -6,6 +6,7 @@ v4 - mean
 v5 - epoch
 v6 - uniform l1
 v7 - higher l1
+v8 - stricter threshold
 
 ======
 v1 - mean
