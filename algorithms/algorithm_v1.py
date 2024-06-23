@@ -52,6 +52,7 @@ class ZhangNet(nn.Module):
 
     def forward(self, X):
         channel_weights = self.weighter(X)
+        channel_weights = torch.mean(channel_weights, dim=0)
         sparse_weights = self.sparse(channel_weights)
         reweight_out = X * sparse_weights
         reweight_out = reweight_out.reshape(reweight_out.shape[0],1,reweight_out.shape[1])
@@ -59,7 +60,7 @@ class ZhangNet(nn.Module):
         return channel_weights, sparse_weights, output
 
 
-class Algorithm_zhang(Algorithm):
+class Algorithm_v1(Algorithm):
     def __init__(self, target_size:int, splits:DataSplits, tag, reporter, verbose, fold):
         super().__init__(target_size, splits, tag, reporter, verbose, fold)
         self.criterion = torch.nn.CrossEntropyLoss()
@@ -87,7 +88,7 @@ class Algorithm_zhang(Algorithm):
             for batch_idx, (X, y) in enumerate(dataloader):
                 optimizer.zero_grad()
                 channel_weights, sparse_weights, y_hat = self.zhangnet(X)
-                deciding_weights = channel_weights
+                deciding_weights = sparse_weights
                 mean_weight, all_bands, selected_bands = self.get_indices(deciding_weights)
                 self.set_all_indices(all_bands)
                 self.set_selected_indices(selected_bands)
