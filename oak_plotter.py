@@ -12,7 +12,10 @@ DSS = {
     "indian_pines" : "Indian Pines"
 }
 
-def plot_oak(source):
+
+def plot_oak(source, exclude=None):
+    if exclude is None:
+        exclude = []
     os.makedirs("saved_figs", exist_ok=True)
     dest = os.path.join("saved_figs","out.png")
     if isinstance(source,str):
@@ -41,14 +44,18 @@ def plot_oak(source):
             if dataset in DSS:
                 dataset_label = DSS[dataset]
             dataset_df = df[df["dataset"] == dataset].copy()
+            algorithm_counter = 0
             for algorithm_index, algorithm in enumerate(algorithms):
+                if algorithm in exclude:
+                    continue
+                algorithm_counter = algorithm_counter + 1
                 algorithm_label = algorithm
                 if algorithm in ALGS:
                     algorithm_label = ALGS[algorithm]
                 alg_df = dataset_df[dataset_df["algorithm"] == algorithm]
                 alg_df = alg_df.sort_values(by='target_size')
                 axes[metric_index, ds_index].plot(alg_df['target_size'], alg_df[metric],
-                        label=algorithm_label, marker=markers[algorithm_index], color=colors[algorithm_index],
+                        label=algorithm_label, marker=markers[algorithm_counter], color=colors[algorithm_counter],
                         fillstyle='none', markersize=10, linewidth=2
                         )
 
