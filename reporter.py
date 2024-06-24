@@ -30,8 +30,8 @@ class Reporter:
                 file.write("dataset,target_size,algorithm,time,oa,aa,k,selected_features,fold\n")
 
         if not self.skip_all_bands:
-            self.all_features_details_filename = f"{tag}_all_features_details_summary.csv"
-            self.all_features_summary_filename = f"{tag}_all_features_summary_details.csv"
+            self.all_features_details_filename = f"{tag}_all_features_details.csv"
+            self.all_features_summary_filename = f"{tag}_all_features_summary.csv"
             self.all_features_summary_file = os.path.join("results", self.all_features_summary_filename)
             self.all_features_details_file = os.path.join("results", self.all_features_details_filename)
 
