@@ -79,7 +79,7 @@ def plot_oak(source, exclude=None):
     plt.close(fig)
 
 
-if __name__ == "__main__":
+def plot_saved(exclude=None):
     files = []
     for d in os.listdir("saved_results"):
         dpath = os.path.join("saved_results",d)
@@ -87,4 +87,11 @@ if __name__ == "__main__":
             if f.endswith("_summary.csv") and not f.startswith("all_"):
                 fpath = os.path.join("saved_results",d,f)
                 files.append(fpath)
-    plot_oak(files)
+    plot_oak(files, exclude)
+
+
+if __name__ == "__main__":
+    #plot_saved()
+    plot_oak(["saved_results/v0/v0_summary.csv","results/v1_summary.csv"])
+
+
