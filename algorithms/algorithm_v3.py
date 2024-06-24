@@ -167,7 +167,7 @@ class Algorithm_v3(Algorithm):
         return torch.mean(channel_weights)
 
     def get_lambda(self, epoch):
-        return 0.0001 * math.exp(-epoch/self.total_epoch)
+        return 0.01 * math.exp(-epoch/self.total_epoch)
 
 
 
