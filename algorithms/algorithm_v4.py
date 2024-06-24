@@ -31,19 +31,11 @@ class ZhangNet(nn.Module):
             nn.Linear(512, self.bands)
         )
         self.classnet = nn.Sequential(
-            nn.Conv1d(1,16,kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm1d(16),
+            nn.Linear(self.bands, 300),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
-            nn.Conv1d(16, 8, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm1d(8),
+            nn.Linear(300, 200),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
-            nn.Conv1d(8, 4, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm1d(4),
-            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
-            nn.Flatten(start_dim=1),
-            nn.Linear(last_layer_input,self.number_of_classes)
+            nn.Linear(200, self.number_of_classes),
         )
         self.sparse = Sparse()
         num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
@@ -163,13 +155,11 @@ class Algorithm_v4(Algorithm):
         return mean_weights, band_indx, band_indx[: self.target_size]
 
     def l1_loss(self, channel_weights):
-        if len(channel_weights.shape) > 1:
-            channel_weights = torch.sum(torch.abs(channel_weights), dim=1)
-        m = torch.mean(channel_weights)
-        return m
+        channel_weights = torch.abs(channel_weights)
+        return torch.mean(channel_weights)
 
     def get_lambda(self, epoch):
-        return 0.0001 * math.exp(-epoch/self.total_epoch)
+        return 0.01 * math.exp(-epoch/self.total_epoch)
 
 
 
