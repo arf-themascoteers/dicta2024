@@ -31,7 +31,10 @@ class ZhangNet(nn.Module):
             nn.Linear(512, self.bands)
         )
         self.classnet = nn.Sequential(
-            nn.Linear(self.bands, 200),
+            nn.Linear(self.bands, 300),
+            nn.ReLU(),
+            nn.BatchNorm1d(300),
+            nn.Linear(300, 200),
             nn.ReLU(),
             nn.BatchNorm1d(200),
             nn.Linear(200, self.number_of_classes),
