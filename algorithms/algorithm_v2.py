@@ -52,6 +52,7 @@ class ZhangNet(nn.Module):
 
     def forward(self, X):
         channel_weights = self.weighter(X)
+        channel_weights = torch.mean(channel_weights, dim=0)
         sparse_weights = self.sparse(channel_weights)
         reweight_out = X * sparse_weights
         reweight_out = reweight_out.reshape(reweight_out.shape[0],1,reweight_out.shape[1])
@@ -163,10 +164,8 @@ class Algorithm_v2(Algorithm):
         return mean_weights, band_indx, band_indx[: self.target_size]
 
     def l1_loss(self, channel_weights):
-        if len(channel_weights.shape) > 1:
-            channel_weights = torch.sum(torch.abs(channel_weights), dim=1)
-        m = torch.mean(channel_weights)
-        return m
+        channel_weights = torch.abs(channel_weights)
+        return torch.mean(channel_weights)
 
     def get_lambda(self, epoch):
         return 0.0001 * math.exp(-epoch/self.total_epoch)
