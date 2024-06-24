@@ -165,7 +165,7 @@ class Algorithm_v0(Algorithm):
     def l1_loss(self, channel_weights):
         if len(channel_weights.shape) > 1:
             channel_weights = torch.sum(torch.abs(channel_weights), dim=1)
-        m = torch.mean(channel_weights)
+        m = torch.mean(torch.abs(channel_weights))
         return m
 
     def get_lambda(self, epoch):
