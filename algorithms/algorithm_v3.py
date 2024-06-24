@@ -14,7 +14,7 @@ class Sparse(nn.Module):
         self.k = 0.1
 
     def forward(self, X):
-        X = torch.where(X < self.k, 0, X)
+        X = torch.where(torch.abs(X) < self.k, 0, X)
         return X
 
 
@@ -28,8 +28,7 @@ class ZhangNet(nn.Module):
         self.weighter = nn.Sequential(
             nn.Linear(self.bands, 512),
             nn.ReLU(),
-            nn.Linear(512, self.bands),
-            nn.Sigmoid()
+            nn.Linear(512, self.bands)
         )
         self.classnet = nn.Sequential(
             nn.Conv1d(1,16,kernel_size=3, stride=1, padding=1),
@@ -164,10 +163,8 @@ class Algorithm_v3(Algorithm):
         return mean_weights, band_indx, band_indx[: self.target_size]
 
     def l1_loss(self, channel_weights):
-        if len(channel_weights.shape) > 1:
-            channel_weights = torch.sum(torch.abs(channel_weights), dim=1)
-        m = torch.mean(channel_weights)
-        return m
+        channel_weights = torch.abs(channel_weights)
+        return torch.mean(channel_weights)
 
     def get_lambda(self, epoch):
         return 0.0001 * math.exp(-epoch/self.total_epoch)
