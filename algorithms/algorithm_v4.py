@@ -11,7 +11,7 @@ import train_test_evaluator
 class Sparse(nn.Module):
     def __init__(self):
         super().__init__()
-        self.k = 0.1
+        self.k = 0.2
 
     def forward(self, X):
         X = torch.where(torch.abs(X) < self.k, 0, X)
@@ -27,6 +27,7 @@ class ZhangNet(nn.Module):
         self.last_layer_input = last_layer_input
         self.weighter = nn.Sequential(
             nn.Linear(self.bands, 512),
+            nn.BatchNorm1d(512),
             nn.ReLU(),
             nn.Linear(512, self.bands)
         )
