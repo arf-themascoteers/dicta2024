@@ -34,7 +34,7 @@ def plot_oak(source, exclude=None):
         df = pd.concat(df, axis=0, ignore_index=True)
 
     df.to_csv(os.path.join("saved_figs","source.split.csv"), index=False)
-    colors = ['#909c86', '#e389b9', '#269658', '#5c1ad6', '#f20a21', "#a8a7a7","#cc527a","#e8175d","#474747","#363636"]
+    colors = ['#e389b9', '#269658', '#5c1ad6', "#a8a7a7","#cc527a","#e8175d","#474747","#363636"]
     markers = ['s', 'P', 'D', '^', 'o', '*', '.']
     labels = ["Overall Accuracy (OA)", "Average Accuracy (AA)", "Cohen's kappa ($\kappa$)"]
 
@@ -116,19 +116,16 @@ def plot_saved(exclude=None):
 
 
 if __name__ == "__main__":
-    plot_saved()
-
-
-    # plot_oak([
-        # "saved_results/all/all_all_features_summary.csv",
-        # "saved_results/v0/v0_summary.csv",
+    plot_oak([
+        "saved_results/all/all_all_features_summary.csv",
+        #"saved_results/linspacer/linspacer_summary.csv",
+        #"saved_results/random/random_summary.csv",
+        "saved_results/v0/v0_summary.csv",
         # "saved_results/v1/v1_summary.csv",
-        # "saved_results/v2/v2_summary.csv",
-        # "saved_results/v3/v3_summary.csv",
-        # "saved_results/v4/v4_summary.csv",
-        # "saved_results/v5/v5_summary.csv"
-
-    # ])
+        #"saved_results/v2/v2_summary.csv",
+        "saved_results/v3/v3_summary.csv",
+        "saved_results/v4/v4_summary.csv"
+    ])
 
 
 

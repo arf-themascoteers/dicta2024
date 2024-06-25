@@ -1,8 +1,8 @@
 import os
 import shutil
 
-source = "v5"
-dest = "v7"
+source = "v6"
+dest = "v4"
 
 s = f"saved_results/{source}"
 t = f"saved_results/{dest}"
