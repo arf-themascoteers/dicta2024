@@ -110,9 +110,9 @@ class Algorithm_v5(Algorithm):
                 lambda_value = self.get_lambda(epoch+1)
 
                 l2_loss = self.l2_loss(channel_weights)
-                lambda_value2 = self.get_lambda2(epoch+1)
+                lambda_value2 = lambda_value*5
 
-                loss = mse_loss + lambda_value*l1_loss + (lambda_value*5)/l2_loss
+                loss = mse_loss + lambda_value*l1_loss + lambda_value2/l2_loss
 
                 if batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,l2_loss.item(), lambda_value2,loss)
@@ -187,8 +187,6 @@ class Algorithm_v5(Algorithm):
     def l2_loss(self, channel_weights):
         return torch.norm(channel_weights, 2)
 
-    def get_lambda2(self, epoch):
-        return 0.00005 * math.exp(-epoch/self.total_epoch)
 
 
 
