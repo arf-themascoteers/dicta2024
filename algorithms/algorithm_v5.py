@@ -6,6 +6,7 @@ import numpy as np
 import math
 from data_splits import DataSplits
 import train_test_evaluator
+import math
 
 
 class Sparse(nn.Module):
@@ -111,7 +112,7 @@ class Algorithm_v5(Algorithm):
                 l2_loss = self.l2_loss(channel_weights)
                 lambda_value2 = self.get_lambda2(epoch+1)
 
-                loss = mse_loss + lambda_value*l1_loss + (2*lambda_value)/l2_loss
+                loss = mse_loss + lambda_value*l1_loss + (lambda_value*5)/l2_loss
 
                 if batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,l2_loss.item(), lambda_value2,loss)
@@ -181,7 +182,7 @@ class Algorithm_v5(Algorithm):
         return torch.norm(channel_weights, 1)
 
     def get_lambda(self, epoch):
-        return 0.01 * math.exp(-epoch/self.total_epoch)
+        return 0.001 * math.exp(-epoch/self.total_epoch)
 
     def l2_loss(self, channel_weights):
         return torch.norm(channel_weights, 2)
