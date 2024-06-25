@@ -41,7 +41,7 @@ def plot_oak(source, exclude=None):
     min_lim = min(df["oa"].min(),df["aa"].min(),df["k"].min())-0.1
     max_lim = max(df["oa"].max(),df["aa"].max(),df["k"].max())+0.1
 
-    min_lim = 0.5
+    min_lim = 0.4
     max_lim = 1
 
     algorithms = df["algorithm"].unique()
@@ -117,14 +117,15 @@ def plot_saved(exclude=None):
 
 if __name__ == "__main__":
     plot_oak([
-        "saved_results/all/all_all_features_summary.csv",
-        #"saved_results/linspacer/linspacer_summary.csv",
-        #"saved_results/random/random_summary.csv",
-        "saved_results/v0/v0_summary.csv",
-        # "saved_results/v1/v1_summary.csv",
-        #"saved_results/v2/v2_summary.csv",
-        "saved_results/v3/v3_summary.csv",
-        "saved_results/v4/v4_summary.csv"
+         "saved_results/v4/v4_summary.csv",
+        "results/v5_summary.csv",
+        # "v4_summary.csv",
+
+        #"saved_results/v4/v4_summary.csv",
+        #"saved_results/v5/v5_summary.csv",
+        #"v5_summary.csv"
+
+
     ])
 
 
