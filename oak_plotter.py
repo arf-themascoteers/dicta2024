@@ -34,7 +34,7 @@ def plot_oak(source, exclude=None):
         df = pd.concat(df, axis=0, ignore_index=True)
 
     df.to_csv(os.path.join("saved_figs","source.split.csv"), index=False)
-    colors = ['#e389b9', '#269658', '#5c1ad6', "#a8a7a7","#cc527a","#e8175d","#474747","#363636"]
+    colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
     markers = ['s', 'P', 'D', '^', 'o', '*', '.']
     labels = ["Overall Accuracy (OA)", "Average Accuracy (AA)", "Cohen's kappa ($\kappa$)"]
 
@@ -99,7 +99,7 @@ def plot_oak(source, exclude=None):
                 axes[metric_index, ds_index].set_title(f"{dataset_label}", fontsize=22, pad=20)
 
     plt.tight_layout()
-    fig.subplots_adjust(wspace=0.5)
+    fig.subplots_adjust(wspace=0.4)
     plt.savefig(dest)
     plt.close(fig)
 
@@ -119,8 +119,10 @@ if __name__ == "__main__":
     pass
 plot_oak([
     "saved_results/v4/v4_summary.csv",
-#    "saved_results/mcuve/mcuve_summary.csv",
-    "saved_results/pcal/pcal_summary.csv"
+    "saved_results/mcuve/mcuve_summary.csv",
+    "saved_results/pcal/pcal_summary.csv",
+    "saved_results/bsnet/bsnet_summary.csv",
+    "saved_results/v0/v0_summary.csv",
 
 ])
 
