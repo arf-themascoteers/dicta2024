@@ -17,6 +17,7 @@ class Sparse(nn.Module):
         return X
 
     def get_k(self, epoch):
+        return 0.2
         start_epoch = 250
         start_lim = 0.1
         end_lim = 0.2
