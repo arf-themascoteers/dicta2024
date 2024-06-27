@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 import os
 
 ALGS = {
-    "v0" : "BS-Net-Classifier",
-    "v4" : "Proposed Algorithm",
-    "all" : "All Bands",
-    "mcuve" : "MCUVE",
-    "bsnet" : "BS-Net-FC",
-    "pcal" : "PCA-loading",
+    "v0": "BS-Net-Classifier [6]",
+    "v4": "Proposed Algorithm",
+    "all": "All Bands",
+    "mcuve": "MCUVE [10]",
+    "bsnet": "BS-Net-FC [5]",
+    "pcal": "PCA-loading [11]",
 }
 
 COLORS = {

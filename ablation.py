@@ -4,12 +4,13 @@ import matplotlib.pyplot as plt
 import os
 
 ALGS = {
-    "v0": "BS-Net-Classifier: Proposed Algorithm excluding FC, Sigmoid, Full-batch, Early-aggregation",
+    #"v0": "BS-Net-Classifier [6]: Proposed Algorithm excluding FC, Sigmoid, Full-batch, Early-aggregation",
+    "v0": "BS-Net-Classifier [6]",
     "v4": "Proposed Algorithm",
     "all": "All Bands",
-    "mcuve": "MCUVE",
-    "bsnet": "BS-Net-FC",
-    "pcal": "PCA-loading",
+    "mcuve": "MCUVE [10]",
+    "bsnet": "BS-Net-FC [5]",
+    "pcal": "PCA-loading [11]",
 
     "v3": "Proposed Algorithm excluding FC",
     "v2": "Proposed Algorithm excluding FC, Sigmoid",
@@ -45,7 +46,7 @@ def plot_oak(source, exclude=None):
     if exclude is None:
         exclude = []
     os.makedirs("saved_figs", exist_ok=True)
-    dest = os.path.join("saved_figs","ablation.png")
+    dest = os.path.join("saved_figs","ablation_1.png")
     if isinstance(source,str):
         df = sanitize_df(pd.read_csv(source))
     else:
@@ -145,10 +146,10 @@ if __name__ == "__main__":
     pass
 plot_oak([
     "saved_results/v0/v0_summary.csv",
-    "saved_results/v1/v1_summary.csv",
-    "saved_results/v2/v2_summary.csv",
-    "saved_results/v3/v3_summary.csv",
-    "saved_results/v4/v4_summary.csv",
+     "saved_results/v1/v1_summary.csv",
+      # "saved_results/v2/v2_summary.csv",
+    #   "saved_results/v3/v3_summary.csv",
+    # "saved_results/v4/v4_summary.csv",
 
 ])
 
