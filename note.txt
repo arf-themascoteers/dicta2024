@@ -1,3 +1,5 @@
 v1: mean first
 v2: full batch
 v3: no sig
+v5: fc
+v4: dynamic k
