@@ -4,12 +4,20 @@ import matplotlib.pyplot as plt
 import os
 
 ALGS = {
-    "v0" : "BS-Net-Classifier",
-    "v4" : "Proposed Algorithm",
-    "all" : "All Bands",
-    "mcuve" : "MCUVE",
-    "bsnet" : "BS-Net-FC",
-    "pcal" : "PCA-loading",
+    "v0": "BS-Net-Classifier",
+    "v4": "Proposed Algorithm",
+    "all": "All Bands",
+    "mcuve": "MCUVE",
+    "bsnet": "BS-Net-FC",
+    "pcal": "PCA-loading",
+
+    "v3": "Proposed Algorithm (excluding FC)",
+    "v2": "Proposed Algorithm (excluding FC, Sigmoid)",
+    "v1": "Proposed Algorithm (excluding FC, Sigmoid, Full-batch)"
+}
+
+DSS = {
+    "indian_pines" : "Indian Pines"
 }
 
 COLORS = {
@@ -19,12 +27,10 @@ COLORS = {
     "mcuve" : "#d62728",
     "bsnet" : "#9467bd",
     "pcal" : "#8c564b",
+    "v1" : "#e377c2",
+    "v2" : "#bcbd22",
+    "v3" : "#17becf"
 }
-
-DSS = {
-    "indian_pines" : "Indian Pines"
-}
-
 
 def sanitize_df(df):
     if "algorithm" not in df.columns:
@@ -39,7 +45,7 @@ def plot_oak(source, exclude=None):
     if exclude is None:
         exclude = []
     os.makedirs("saved_figs", exist_ok=True)
-    dest = os.path.join("saved_figs","comp.png")
+    dest = os.path.join("saved_figs","ablation.png")
     if isinstance(source,str):
         df = sanitize_df(pd.read_csv(source))
     else:
@@ -56,8 +62,6 @@ def plot_oak(source, exclude=None):
 
     min_lim = 0.3
     max_lim = 1
-
-
 
     order = ["all","pcal","mcuve","bsnet","v0","v1","v2","v3","v4"]
     df["algorithm"] = pd.Categorical(df["algorithm"], categories=order, ordered=True)
@@ -89,7 +93,6 @@ def plot_oak(source, exclude=None):
                     color = COLORS[algorithm]
                 else:
                     color = colors[algorithm_counter]
-
                 marker = markers[algorithm_counter]
                 if algorithm == "all":
                     oa = alg_df.iloc[0]["oa"]
@@ -113,7 +116,7 @@ def plot_oak(source, exclude=None):
             axes[metric_index, ds_index].tick_params(axis='both', which='major', labelsize=14)
             if ds_index == len(datasets)-1 and metric_index == 0:
                 legend = axes[metric_index, ds_index].legend(title="Algorithms", loc='upper left', fontsize=18,
-                                                             bbox_to_anchor=(0, 1.6), ncols=3)
+                                                             bbox_to_anchor=(0, 1.6), ncols=1)
                 legend.get_title().set_fontsize('18')
                 legend.get_title().set_fontweight('bold')
 
@@ -141,12 +144,11 @@ def plot_saved(exclude=None):
 if __name__ == "__main__":
     pass
 plot_oak([
-    "saved_results/v4/v4_summary.csv",
-    "saved_results/mcuve/mcuve_summary.csv",
-    "saved_results/pcal/pcal_summary.csv",
-    "saved_results/bsnet/bsnet_summary.csv",
     "saved_results/v0/v0_summary.csv",
-    "saved_results/all/all_all_features_summary.csv",
+    "saved_results/v1/v1_summary.csv",
+    "saved_results/v2/v2_summary.csv",
+    "saved_results/v3/v3_summary.csv",
+    "saved_results/v4/v4_summary.csv",
 
 ])
 
