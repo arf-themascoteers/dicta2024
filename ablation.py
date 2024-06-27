@@ -4,16 +4,16 @@ import matplotlib.pyplot as plt
 import os
 
 ALGS = {
-    "v0": "BS-Net-Classifier",
+    "v0": "BS-Net-Classifier: Proposed Algorithm excluding FC, Sigmoid, Full-batch, Early-aggregation",
     "v4": "Proposed Algorithm",
     "all": "All Bands",
     "mcuve": "MCUVE",
     "bsnet": "BS-Net-FC",
     "pcal": "PCA-loading",
 
-    "v3": "Proposed Algorithm (excluding FC)",
-    "v2": "Proposed Algorithm (excluding FC, Sigmoid)",
-    "v1": "Proposed Algorithm (excluding FC, Sigmoid, Full-batch)"
+    "v3": "Proposed Algorithm excluding FC",
+    "v2": "Proposed Algorithm excluding FC, Sigmoid",
+    "v1": "Proposed Algorithm excluding FC, Sigmoid, Full-batch"
 }
 
 DSS = {
