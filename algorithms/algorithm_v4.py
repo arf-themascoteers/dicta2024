@@ -18,20 +18,6 @@ class Sparse(nn.Module):
 
     def get_k(self, epoch):
         return 0.2
-        start_epoch = 250
-        start_lim = 0.1
-        end_lim = 0.2
-        offset_k = end_lim - start_lim
-        active_epochs = 500 - start_epoch
-        unit_k = offset_k/active_epochs
-
-        if epoch<start_epoch:
-            return 0
-
-        current_offset = epoch-start_epoch
-        k = start_lim + current_offset*unit_k
-        return k
-
 
 
 class ZhangNet(nn.Module):
