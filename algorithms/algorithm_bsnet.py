@@ -4,6 +4,7 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 from data_splits import DataSplits
 import train_test_evaluator
+import torch
 
 
 class BSNetFC(nn.Module):
