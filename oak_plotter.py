@@ -57,7 +57,7 @@ def plot_oak(source, exclude=None, include=None, out_file="baseline.png"):
     df.to_csv(os.path.join("saved_figs","source.split.csv"), index=False)
     colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
     markers = ['s', 'P', 'D', '^', 'o', '*', '.']
-    labels = ["Overall Accuracy (OA)", "Average Accuracy (AA)", "Cohen's kappa ($\kappa$)"]
+    labels = ["Overall Accuracy (OA)", "Average Accuracy (AA)", r"Cohen's kappa ($\kappa$)"]
 
     min_lim = min(df["oa"].min(),df["aa"].min(),df["k"].min())-0.1
     max_lim = max(df["oa"].max(),df["aa"].max(),df["k"].max())+0.1
@@ -179,5 +179,6 @@ def plot_ablation():
 
 if __name__ == "__main__":
     plot_baseline()
+    plot_ablation()
 
 
