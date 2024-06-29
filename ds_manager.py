@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from data_splits import DataSplits
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import minmax_scale
 
 
 class DSManager:
@@ -14,11 +14,10 @@ class DSManager:
         self._reset_seed()
         dataset_path = f"data/{name}.csv"
         df = pd.read_csv(dataset_path)
-        df.iloc[:, -1], class_labels = pd.factorize(df.iloc[:, -1])
-        scaler = MinMaxScaler()
-        df.iloc[:, :-1] = scaler.fit_transform(df.iloc[:, :-1])
+        # df.iloc[:, -1], class_labels = pd.factorize(df.iloc[:, -1])
+        # scaler = MinMaxScaler()
+        df.iloc[:, :-1] = minmax_scale(df.iloc[:, :-1])
         self.data = df.to_numpy()
-        #train:validation:evaluation_train:evaluation_test = 0.45:  0.0.5:  0.50    :0.50
 
     def get_name(self):
         return self.name
@@ -42,9 +41,11 @@ class DSManager:
 
     def get_all_set_X_y_from_data(self, seed):
         data = self._shuffle(seed)
-        train_validation, evaluation = train_test_split(data, test_size=0.3, random_state=seed, stratify=data[:,-1])
-        train, validation = train_test_split(train_validation, test_size=0.1, random_state=seed, stratify=train_validation[:,-1])
-        evaluation_train, evaluation_test = train_test_split(evaluation, test_size=0.5, random_state=seed, stratify=evaluation[:,-1])
+        train = data
+        validation = data
+        foreground_data = data[data[:, -1] != 0]
+        #foreground_data = data
+        evaluation_train, evaluation_test = train_test_split(foreground_data, test_size=0.95, random_state=seed, stratify=foreground_data[:,-1])
         return DataSplits(self.name, *DSManager.get_X_y_from_data(train),
                           *DSManager.get_X_y_from_data(validation),
                           *DSManager.get_X_y_from_data(evaluation_train),
