@@ -21,7 +21,7 @@ class Sparse(nn.Module):
 class ZhangNet(nn.Module):
     def __init__(self, bands, number_of_classes, last_layer_input):
         super().__init__()
-        torch.manual_seed(3)
+        
         self.bands = bands
         self.number_of_classes = number_of_classes
         self.last_layer_input = last_layer_input
