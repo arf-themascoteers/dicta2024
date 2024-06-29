@@ -148,29 +148,29 @@ def plot_saved(exclude=None):
     plot_oak(files, exclude)
 
 
-def plot_baseline():
-    plot_oak(["saved_results/all/all_summary.csv"],
+def plot_baseline(source):
+    plot_oak(source,
          exclude=["v1""v2","v3"],
          out_file = "baseline.png"
     )
 
-def plot_ablation():
-    plot_oak(["saved_results/all/all_summary.csv"],
+def plot_ablation(source):
+    plot_oak(source,
          include=["v0","v1"],
          out_file = "ablation_1.png"
     )
 
-    plot_oak(["saved_results/all/all_summary.csv"],
+    plot_oak(source,
          include=["v0","v1","v2"],
          out_file = "ablation_2.png"
     )
 
-    plot_oak(["saved_results/all/all_summary.csv"],
+    plot_oak(source,
          include=["v2","v3"],
          out_file = "ablation_3.png"
     )
 
-    plot_oak(["saved_results/all/all_summary.csv"],
+    plot_oak(source,
          include=["v3","v4"],
          out_file = "ablation_3.png"
     )
@@ -178,7 +178,7 @@ def plot_ablation():
 
 
 if __name__ == "__main__":
-    plot_baseline()
-    plot_ablation()
+    plot_baseline(["saved_results/all_summary.csv", "saved_results/all_all_features_summary.csv"])
+    plot_ablation(["saved_results/all_summary.csv"])
 
 
