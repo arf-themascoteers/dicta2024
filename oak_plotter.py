@@ -66,8 +66,8 @@ def plot_oak(source, exclude=None, include=None, out_file="baseline.png"):
     max_lim = 1
 
     order = ["all","pcal","mcuve","bsnet","v0","v1","v2","v3","v4"]
-    df["algorithm"] = pd.Categorical(df["algorithm"], categories=order, ordered=True)
-    df = df.sort_values("algorithm")
+    df["sort_order"] = df["algorithm"].apply(lambda x: order.index(x) if x in order else len(order) + ord(x[0]))
+    df = df.sort_values("sort_order").drop(columns=["sort_order"])
 
     algorithms = df["algorithm"].unique()
     datasets = df["dataset"].unique()
