@@ -10,19 +10,27 @@ ALGS = {
     "mcuve": "MCUVE [10]",
     "bsnet": "BS-Net-FC [5]",
     "pcal": "PCA-loading [11]",
-}
-
-COLORS = {
-    "v0" : "#1f77b4",
-    "v4" : "#ff7f0e",
-    "all" : "#2ca02c",
-    "mcuve" : "#d62728",
-    "bsnet" : "#9467bd",
-    "pcal" : "#8c564b",
+    "v3": "Proposed Algorithm excluding FC",
+    "v2": "Proposed Algorithm excluding FC, Sigmoid",
+    "v1": "Proposed Algorithm excluding FC, Sigmoid, Full-batch"
 }
 
 DSS = {
-    "indian_pines" : "Indian Pines"
+    "indian_pines" : "Indian Pines",
+    "paviaU" : "paviaU",
+    "salinas" : "salinas",
+}
+
+COLORS = {
+    "v0": "#1f77b4",
+    "v4": "#ff7f0e",
+    "all": "#2ca02c",
+    "mcuve": "#d62728",
+    "bsnet": "#9467bd",
+    "pcal": "#8c564b",
+    "v1": "#e377c2",
+    "v2": "#bcbd22",
+    "v3": "#17becf"
 }
 
 
@@ -35,11 +43,11 @@ def sanitize_df(df):
     return df
 
 
-def plot_oak(source, exclude=None):
+def plot_oak(source, exclude=None, include=None, out_file="baseline.png"):
     if exclude is None:
         exclude = []
     os.makedirs("saved_figs", exist_ok=True)
-    dest = os.path.join("saved_figs","comp.png")
+    dest = os.path.join("saved_figs",out_file)
     if isinstance(source,str):
         df = sanitize_df(pd.read_csv(source))
     else:
@@ -49,7 +57,7 @@ def plot_oak(source, exclude=None):
     df.to_csv(os.path.join("saved_figs","source.split.csv"), index=False)
     colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
     markers = ['s', 'P', 'D', '^', 'o', '*', '.']
-    labels = ["Overall Accuracy (OA)", "Average Accuracy (AA)", "Cohen's kappa ($\kappa$)"]
+    labels = ["Overall Accuracy (OA)", "Average Accuracy (AA)", r"Cohen's kappa ($\kappa$)"]
 
     min_lim = min(df["oa"].min(),df["aa"].min(),df["k"].min())-0.1
     max_lim = max(df["oa"].max(),df["aa"].max(),df["k"].max())+0.1
@@ -57,14 +65,17 @@ def plot_oak(source, exclude=None):
     min_lim = 0.3
     max_lim = 1
 
-
-
     order = ["all","pcal","mcuve","bsnet","v0","v1","v2","v3","v4"]
-    df["algorithm"] = pd.Categorical(df["algorithm"], categories=order, ordered=True)
-    df = df.sort_values("algorithm")
+    df["sort_order"] = df["algorithm"].apply(lambda x: order.index(x) if x in order else len(order) + ord(x[0]))
+    df = df.sort_values("sort_order").drop(columns=["sort_order"])
 
     algorithms = df["algorithm"].unique()
     datasets = df["dataset"].unique()
+
+    if include is None:
+        include = algorithms
+
+    include = [x for x in include if x not in exclude]
 
     fig, axes = plt.subplots(nrows=3, ncols=len(datasets), figsize=(15, 15))
     axes = np.reshape(axes, (3, -1))
@@ -76,9 +87,7 @@ def plot_oak(source, exclude=None):
                 dataset_label = DSS[dataset]
             dataset_df = df[df["dataset"] == dataset].copy()
             algorithm_counter = 0
-            for algorithm_index, algorithm in enumerate(algorithms):
-                if algorithm in exclude:
-                    continue
+            for algorithm_index, algorithm in enumerate(include):
                 algorithm_label = algorithm
                 if algorithm in ALGS:
                     algorithm_label = ALGS[algorithm]
@@ -127,6 +136,7 @@ def plot_oak(source, exclude=None):
     plt.close(fig)
 
 
+
 def plot_saved(exclude=None):
     files = []
     for d in os.listdir("saved_results"):
@@ -138,17 +148,37 @@ def plot_saved(exclude=None):
     plot_oak(files, exclude)
 
 
+def plot_baseline(source):
+    plot_oak(source,
+         exclude=["v1""v2","v3"],
+         out_file = "baseline.png"
+    )
+
+def plot_ablation(source):
+    plot_oak(source,
+         include=["v0","v1"],
+         out_file = "ablation_1.png"
+    )
+
+    plot_oak(source,
+         include=["v0","v1","v2"],
+         out_file = "ablation_2.png"
+    )
+
+    plot_oak(source,
+         include=["v2","v3"],
+         out_file = "ablation_3.png"
+    )
+
+    plot_oak(source,
+         include=["v3","v4"],
+         out_file = "ablation_3.png"
+    )
+
+
+
 if __name__ == "__main__":
-    pass
-plot_oak([
-    "saved_results/v4/v4_summary.csv",
-    "saved_results/mcuve/mcuve_summary.csv",
-    "saved_results/pcal/pcal_summary.csv",
-    "saved_results/bsnet/bsnet_summary.csv",
-    "saved_results/v0/v0_summary.csv",
-    "saved_results/all/all_all_features_summary.csv",
-
-])
-
+    plot_baseline(["saved_results/all_summary.csv", "saved_results/all_all_features_summary.csv"])
+    plot_ablation(["saved_results/all_summary.csv"])
 
 
