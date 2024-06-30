@@ -65,6 +65,8 @@ class Algorithm_v0(Algorithm):
         self.criterion = torch.nn.CrossEntropyLoss()
         self.class_size = len(np.unique(self.splits.train_y))
         self.last_layer_input = 100
+        if self.splits.name == "paviaU":
+            self.last_layer_input = 48
         self.zhangnet = ZhangNet(self.splits.train_x.shape[1], self.class_size, self.last_layer_input).to(self.device)
         self.total_epoch = 500
         self.epoch = -1
