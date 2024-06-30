@@ -41,6 +41,9 @@ class DSManager:
 
     def get_all_set_X_y_from_data(self, seed):
         data = self._shuffle(seed)
+        print("Total samples", len(data))
+        data = data[~np.isnan(data).any(axis=1)]
+        print("Non-NaN samples", len(data))
         train = data
         validation = data
         foreground_data = data[data[:, -1] != 0]
