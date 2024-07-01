@@ -108,17 +108,19 @@ class Algorithm_v3(Algorithm):
         return self.zhangnet, self.selected_indices
 
     def report_stats(self, channel_weights, sparse_weights, epoch, mse_loss, l1_loss, lambda1, l2_loss, lambda2, loss):
-        _, _,y_hat = self.zhangnet(self.X_train)
-        yp = torch.argmax(y_hat, dim=1)
-        yt = self.y_train.cpu().detach().numpy()
-        yh = yp.cpu().detach().numpy()
-        t_oa, t_aa, t_k = train_test_evaluator.calculate_metrics(yt, yh)
+        # _, _,y_hat = self.zhangnet(self.X_train)
+        # yp = torch.argmax(y_hat, dim=1)
+        # yt = self.y_train.cpu().detach().numpy()
+        # yh = yp.cpu().detach().numpy()
+        # t_oa, t_aa, t_k = train_test_evaluator.calculate_metrics(yt, yh)
+        t_oa, t_aa, t_k = 0,0,0
 
-        _, _,y_hat = self.zhangnet(self.X_val)
-        yp = torch.argmax(y_hat, dim=1)
-        yt = self.y_val.cpu().detach().numpy()
-        yh = yp.cpu().detach().numpy()
-        v_oa, v_aa, v_k = train_test_evaluator.calculate_metrics(yt, yh)
+        # _, _,y_hat = self.zhangnet(self.X_val)
+        # yp = torch.argmax(y_hat, dim=1)
+        # yt = self.y_val.cpu().detach().numpy()
+        # yh = yp.cpu().detach().numpy()
+        # v_oa, v_aa, v_k = train_test_evaluator.calculate_metrics(yt, yh)
+        v_oa, v_aa, v_k = 0,0,0
 
         mean_weight = channel_weights
         means_sparse = sparse_weights
