@@ -43,7 +43,7 @@ class TaskRunner:
             if algorithm.weights is not None:
                 weights = algorithm.weights
                 if isinstance(weights, np.ndarray):
-                    weights = torch.tensor(weights.copy())
+                    weights = torch.tensor(weights.copy(), dtype=torch.float64)
                 weights = torch.abs(weights)
                 weights = torch.sort(weights, descending=True)[0]
                 for i,w in enumerate(weights):
