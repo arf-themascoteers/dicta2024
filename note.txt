@@ -1,7 +1,10 @@
-v1: mean first
+v1: mean first - std of heighest band
 v2: full batch
-v3: no sig
-v4: fc
+v3: no sig - weight update of highest and lowest weights
+            - weight update of first level weights
+v4: fc - squiggly
 ===
+
+v0 - across batch weight variation
 
 if BSnet results dont match - include background
