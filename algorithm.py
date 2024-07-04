@@ -40,7 +40,7 @@ class Algorithm(ABC):
         oas = []
         aas = []
         ks = []
-        for fold, train_x, train_y, test_x, test_y in enumerate(self.dataset.get_k_folds()):
+        for fold, (train_x, test_x, train_y, test_y) in enumerate(self.dataset.get_k_folds()):
             oa, aa, k = train_test_evaluator.evaluate_split(train_x, train_y, test_x, test_y)
             oas.append(oa)
             aas.append(aa)

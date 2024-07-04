@@ -78,7 +78,7 @@ class TaskRunner:
         return Metrics(row["time"], row["oa"],row["aa"], row["k"], selected_features, selected_weights)
 
     def evaluate_for_all_features(self, dataset):
-        for fold, train_x, train_y, test_x, test_y in enumerate(dataset.get_k_folds()):
+        for fold, (train_x, test_x, train_y, test_y) in enumerate(dataset.get_k_folds()):
             oa, aa, k = train_test_evaluator.evaluate_split(train_x, train_y, test_x, test_y)
             self.reporter.write_details_all_features(fold, dataset.get_name(), oa, aa, k)
 

@@ -42,7 +42,7 @@ class DSManager:
             yield self.get_a_fold(seed)
 
     def get_a_fold(self, seed=50):
-        return train_test_split(self.foreground_data[:.0:-1], self.foreground_data[:-1], test_size=0.95, random_state=seed,
+        return train_test_split(self.foreground_data[:,0:-1], self.foreground_data[:,-1], test_size=0.95, random_state=seed,
                          stratify=self.foreground_data[:, -1])
 
     def __repr__(self):
