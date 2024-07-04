@@ -86,9 +86,9 @@ class Reporter:
         if len(df) == 0:
             return
 
-        oa = max(df["oa"].mean(),0)
-        aa = max(df["aa"].mean(),0)
-        k = max(df["k"].mean(),0)
+        oa = round(max(df["oa"].mean(),0),2)
+        aa = round(max(df["aa"].mean(),0),2)
+        k = round(max(df["k"].mean(),0),2)
 
         df2 = pd.read_csv(self.all_features_summary_file)
         mask = (df2['dataset'] == dataset)
@@ -103,12 +103,12 @@ class Reporter:
     def get_saved_metrics(self, algorithm):
         df = pd.read_csv(self.summary_file)
         if len(df) == 0:
-            return None
+            return None, None, None, None
         rows = df.loc[(df["dataset"] == algorithm.dataset.get_name()) & (df["target_size"] == algorithm.target_size) &
                       (df["algorithm"] == algorithm.get_name())
                       ]
         if len(rows) == 0:
-            return None
+            return None, None, None, None
         row = rows.iloc[0]
         return Metrics(row["time"], row["oa"], row["aa"], row["k"], row["selected_features"], row["selected_weights"])
 

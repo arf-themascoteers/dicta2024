@@ -7,7 +7,7 @@ import importlib
 
 
 class Algorithm(ABC):
-    def __init__(self, target_size:int, dataset, tag, reporter, verbose, fold):
+    def __init__(self, target_size:int, dataset, tag, reporter, verbose):
         self.target_size = target_size
         self.dataset = dataset
         self.tag = tag
