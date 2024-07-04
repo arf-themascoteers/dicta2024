@@ -4,6 +4,7 @@ from datetime import datetime
 import train_test_evaluator
 import torch
 import importlib
+import numpy as np
 
 
 class Algorithm(ABC):
@@ -41,14 +42,14 @@ class Algorithm(ABC):
         aas = []
         ks = []
         for fold, (train_x, test_x, train_y, test_y) in enumerate(self.dataset.get_k_folds()):
-            oa, aa, k = train_test_evaluator.evaluate_split(train_x, train_y, test_x, test_y)
+            oa, aa, k = train_test_evaluator.evaluate_split(train_x, test_x, train_y, test_y)
             oas.append(oa)
             aas.append(aa)
             ks.append(k)
         oa = sum(oas) / len(oas)
         aa = sum(aas) / len(aas)
         k = sum(aas) / len(ks)
-        return oas, aas, ks, Metrics(elapsed_time, oa, aa, k, self.selected_indices, self.weights)
+        return oas, aas, ks, Metrics(elapsed_time, oa, aa, k, self.selected_indices, self.get_weights())
 
     @abstractmethod
     def get_selected_indices(self):
@@ -80,3 +81,8 @@ class Algorithm(ABC):
 
     def set_weights(self, mean_weight):
         self.weights = mean_weight
+
+    def get_weights(self):
+        if torch.is_tensor(self.weights) or isinstance(self.weights, np.ndarray):
+            return self.weights.tolist()
+        return self.weights

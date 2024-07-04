@@ -61,7 +61,7 @@ class TaskRunner:
             "algorithm": algorithm.get_name(),
             "time":metric.time,"oa":metric.oa,"aa":metric.aa,"k":metric.k,
             "selected_features":algorithm.get_all_indices(),
-            "selected_weights":algorithm.weights
+            "selected_weights":algorithm.get_weights()
         }
 
     def get_from_cache(self, algorithm:Algorithm):
@@ -82,7 +82,7 @@ class TaskRunner:
 
     def evaluate_for_all_features(self, dataset):
         for fold, (train_x, test_x, train_y, test_y) in enumerate(dataset.get_k_folds()):
-            oa, aa, k = train_test_evaluator.evaluate_split(train_x, train_y, test_x, test_y)
+            oa, aa, k = train_test_evaluator.evaluate_split(train_x, test_x, train_y, test_y)
             self.reporter.write_details_all_features(fold, dataset.get_name(), oa, aa, k)
 
 
