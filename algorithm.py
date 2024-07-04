@@ -42,6 +42,8 @@ class Algorithm(ABC):
         aas = []
         ks = []
         for fold, (train_x, test_x, train_y, test_y) in enumerate(self.dataset.get_k_folds()):
+            train_x = self.transform(train_x)
+            test_x = self.transform(test_x)
             oa, aa, k = train_test_evaluator.evaluate_split(train_x, test_x, train_y, test_y)
             oas.append(oa)
             aas.append(aa)
