@@ -5,7 +5,6 @@ if __name__ == '__main__':
     tasks = {
         # "algorithms" : ["pcal","mcuve","bsnet","v0","v1","v2","v3","v4"],
         # "datasets" : ["indian_pines","paviaU","salinas"],
-        "algorithms": ["v0"],
         "datasets": ["indian_pines"],
         "target_sizes" : list(range(30,4,-1))
     }
