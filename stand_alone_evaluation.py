@@ -8,10 +8,10 @@ def evaluate(dataset, folds, bands):
     ks = []
     d = DSManager(dataset,folds)
     for fold, splits in enumerate(d.get_k_folds()):
-        evaluation_train_x = splits.evaluation_train_x[:,bands]
-        evaluation_test_x = splits.evaluation_test_x[:,bands]
+        train_x = splits.train_x[:,bands]
+        test_x = splits.test_x[:,bands]
 
-        oa, aa, k = evaluate_train_test_pair(evaluation_train_x, splits.evaluation_train_y, evaluation_test_x, splits.evaluation_test_y)
+        oa, aa, k = evaluate_train_test_pair(train_x, splits.train_y, test_x, splits.test_y)
         oas.append(oa)
         aas.append(aa)
         ks.append(k)

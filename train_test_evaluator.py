@@ -23,21 +23,21 @@ def average_accuracy(y_true, y_pred):
     return aa
 
 
-def evaluate_train_test_pair(evaluation_train_x, evaluation_train_y, evaluation_test_x, evaluation_test_y):
+def evaluate_train_test_pair(train_x, train_y, test_x, test_y):
     evaluator_algorithm = get_metric_evaluator()
-    evaluator_algorithm.fit(evaluation_train_x, evaluation_train_y)
-    y_pred = evaluator_algorithm.predict(evaluation_test_x)
-    return calculate_metrics(evaluation_test_y, y_pred)
+    evaluator_algorithm.fit(train_x, train_y)
+    y_pred = evaluator_algorithm.predict(test_x)
+    return calculate_metrics(test_y, y_pred)
 
 
 def evaluate_split(split:DataSplits, transform=None):
     if transform is None:
-        evaluation_train_x = split.evaluation_train_x
-        evaluation_test_x = split.evaluation_test_x
+        train_x = split.train_x
+        test_x = split.test_x
     else:
-        evaluation_train_x = transform.transform(split.evaluation_train_x)
-        evaluation_test_x = transform.transform(split.evaluation_test_x)
-    return evaluate_train_test_pair(evaluation_train_x, split.evaluation_train_y, evaluation_test_x, split.evaluation_test_y)
+        train_x = transform.transform(split.train_x)
+        test_x = transform.transform(split.test_x)
+    return evaluate_train_test_pair(train_x, split.train_y, test_x, split.test_y)
 
 
 def calculate_metrics(y_test, y_pred):
