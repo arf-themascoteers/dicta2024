@@ -19,6 +19,6 @@ class Algorithm_pcal(Algorithm):
 
         self.set_all_indices(feature_ranking)
         self.set_selected_indices(indices)
-        self.set_weights(np.argsort(feature_importance)[::-1])
+        self.set_weights(feature_importance[feature_ranking])
         return self, indices
 

@@ -34,16 +34,19 @@ class TaskRunner:
         return self.reporter.get_summary(), self.reporter.get_details()
 
     def process_a_case(self, algorithm:Algorithm):
-        oas, aas, ks, metric = self.reporter.get_saved_metrics(algorithm)
+        metric = self.reporter.get_saved_metrics(algorithm)
         if metric is None:
             oas, aas, ks, metric = self.get_results_for_a_case(algorithm)
             self.reporter.write_summary(algorithm, oas, aas, ks, metric)
+        else:
+            print(algorithm.get_name(), "for", algorithm.dataset.get_name(), "for", algorithm.target_size,"was done. Skipping")
 
     def get_results_for_a_case(self, algorithm:Algorithm):
         metric = self.get_from_cache(algorithm)
         if metric is not None:
             print(f"Selected features got from cache for {algorithm.dataset.get_name()} for size {algorithm.target_size} for {algorithm.get_name()}")
             algorithm.set_selected_indices(metric.selected_features)
+            algorithm.set_weights(metric.selected_weights)
             return algorithm.compute_performance()
         print(f"Computing {algorithm.get_name()} {algorithm.dataset.get_name()}")
         oas, aas, ks, metric = algorithm.compute_performance()

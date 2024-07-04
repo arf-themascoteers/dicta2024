@@ -65,12 +65,12 @@ class Reporter:
             file.write(f"{algorithm.dataset.get_name()},{algorithm.target_size},{algorithm.get_name()},"
                        f"{time},{oa},{aa},{k},"
                        f"{'|'.join([str(i) for i in selected_features])},"
-                       f"{'|'.join([str(i) for i in selected_weights])}")
+                       f"{'|'.join([str(i) for i in selected_weights])}\n")
 
         with open(self.details_file, 'a') as file:
             for i in range(len(oas)):
                 file.write(f"{algorithm.dataset.get_name()},{algorithm.target_size},{algorithm.get_name()},"
-                       f"{round(oas[i],2)},{round(aa[i],2)},{round(k[i],2)},{i}")
+                       f"{round(oas[i],2)},{round(aas[i],2)},{round(ks[i],2)},{i}\n")
 
     def write_details_all_features(self, fold, name, oa, aa, k):
         oa = Reporter.sanitize_metric(oa)
@@ -103,12 +103,12 @@ class Reporter:
     def get_saved_metrics(self, algorithm):
         df = pd.read_csv(self.summary_file)
         if len(df) == 0:
-            return None, None, None, None
+            return None
         rows = df.loc[(df["dataset"] == algorithm.dataset.get_name()) & (df["target_size"] == algorithm.target_size) &
                       (df["algorithm"] == algorithm.get_name())
                       ]
         if len(rows) == 0:
-            return None, None, None, None
+            return None
         row = rows.iloc[0]
         return Metrics(row["time"], row["oa"], row["aa"], row["k"], row["selected_features"], row["selected_weights"])
 
