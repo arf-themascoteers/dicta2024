@@ -10,11 +10,12 @@ import numpy as np
 
 
 class TaskRunner:
-    def __init__(self, task, folds=1, tag="results", skip_all_bands=False, verbose=False):
+    def __init__(self, task, folds=1, tag="results", skip_all_bands=False, verbose=False, remove_bg=False):
         self.task = task
         self.folds = folds
         self.skip_all_bands = skip_all_bands
         self.verbose = verbose
+        self.remove_bg = remove_bg
         self.tag = tag
         self.reporter = Reporter(self.tag, self.skip_all_bands)
         self.cache = pd.DataFrame(columns=["dataset","fold","algorithm",
@@ -22,7 +23,7 @@ class TaskRunner:
 
     def evaluate(self):
         for dataset_name in self.task["datasets"]:
-            dataset = DSManager(name=dataset_name, folds=self.folds)
+            dataset = DSManager(name=dataset_name, folds=self.folds, remove_bg=self.remove_bg)
             if not self.skip_all_bands:
                 self.evaluate_for_all_features(dataset)
             for fold, splits in enumerate(dataset.get_k_folds()):
@@ -40,15 +41,17 @@ class TaskRunner:
         if metric is None:
             metric = self.get_results_for_a_case(algorithm, fold)
             self.reporter.write_details(algorithm, metric)
-            if algorithm.weights is not None:
-                weights = algorithm.weights
-                if isinstance(weights, np.ndarray):
-                    weights = torch.tensor(weights.copy(), dtype=torch.float64)
-                weights = torch.abs(weights)
-                weights = torch.sort(weights, descending=True)[0]
-                for i,w in enumerate(weights):
-                    print(i+1, round(w.item(),4))
+            #self.print_weights(algorithm)
 
+    def print_weights(self, algorithm):
+        if algorithm.weights is not None:
+            weights = algorithm.weights
+            if isinstance(weights, np.ndarray):
+                weights = torch.tensor(weights.copy(), dtype=torch.float64)
+            weights = torch.abs(weights)
+            weights = torch.sort(weights, descending=True)[0]
+            for i, w in enumerate(weights):
+                print(i + 1, round(w.item(), 4))
 
     def get_results_for_a_case(self, algorithm:Algorithm, fold):
         metric = self.get_from_cache(algorithm, fold)

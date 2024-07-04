@@ -6,7 +6,7 @@ from sklearn.preprocessing import minmax_scale
 
 
 class DSManager:
-    def __init__(self, name, folds=1):
+    def __init__(self, name, folds=1, remove_bg=False):
         self.name = name
         self.folds = folds
         self.init_seed = 40
@@ -14,8 +14,7 @@ class DSManager:
         self._reset_seed()
         dataset_path = f"data/{name}.csv"
         df = pd.read_csv(dataset_path)
-        # df.iloc[:, -1], class_labels = pd.factorize(df.iloc[:, -1])
-        # scaler = MinMaxScaler()
+        self.remove_bg = remove_bg
         df.iloc[:, :-1] = minmax_scale(df.iloc[:, :-1])
         self.data = df.to_numpy()
 
@@ -41,13 +40,16 @@ class DSManager:
 
     def get_all_set_X_y_from_data(self, seed):
         data = self._shuffle(seed)
-        print("Total samples", len(data))
-        data = data[~np.isnan(data).any(axis=1)]
-        print("Non-NaN samples", len(data))
+        print(f"{self.name}: Total samples", len(data))
+        # data = data[~np.isnan(data).any(axis=1)]
+        # print("Non-NaN samples", len(data))
+        foreground_data = data[data[:, -1] != 0]
+        if self.remove_bg:
+            foreground_data[:, -1] = foreground_data[:, -1] - 1
+            data = foreground_data
         train = data
         validation = data
-        foreground_data = data[data[:, -1] != 0]
-        #foreground_data = data
+        print(f"{self.name}: After background processing, Total samples", len(data))
         evaluation_train, evaluation_test = train_test_split(foreground_data, test_size=0.95, random_state=seed, stratify=foreground_data[:,-1])
         return DataSplits(self.name, *DSManager.get_X_y_from_data(train),
                           *DSManager.get_X_y_from_data(validation),

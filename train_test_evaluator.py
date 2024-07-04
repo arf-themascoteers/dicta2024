@@ -12,10 +12,15 @@ from data_splits import DataSplits
 
 
 def average_accuracy(y_true, y_pred):
-    cm = confusion_matrix(y_true, y_pred)
-    per_class_accuracy = cm.diagonal() / cm.sum(axis=1)
-    avg_accuracy = np.mean(per_class_accuracy)
-    return avg_accuracy
+    ca = []
+    for c in np.unique(y_true):
+        y_c = y_true[np.nonzero(y_true == c)]
+        y_c_p = y_pred[np.nonzero(y_true == c)]
+        acurracy = accuracy_score(y_c, y_c_p)
+        ca.append(acurracy)
+    ca = np.array(ca)
+    aa = ca.mean()
+    return aa
 
 
 def evaluate_train_test_pair(evaluation_train_x, evaluation_train_y, evaluation_test_x, evaluation_test_y):
