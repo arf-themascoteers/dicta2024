@@ -10,9 +10,20 @@ ALGS = {
     "mcuve": "MCUVE [10]",
     "bsnet": "BS-Net-FC [5]",
     "pcal": "PCA-loading [11]",
-    "v3": "BS-Net-Classifier [6] + Mean Weights + Full Batch + Removed Sigmoid",
-    "v2": "BS-Net-Classifier [6] + Mean Weights + Full Batch",
-    "v1": "BS-Net-Classifier [6] + Mean Weights",
+
+    "v22": "BS-Net-Classifier [6] + FC + Mean Weights + Full Batch + Removed Sigmoid (same l1)",
+    "v31": "BS-Net-Classifier [6] + FC + Mean Weights + Full Batch + Removed Sigmoid",
+
+    #"v2": "BS-Net-Classifier [6] + FC + Mean Weights",
+    "v2": "BS-Net-Classifier [6] + FC + Mean Weights + Full Batch",
+    "v21": "BS-Net-Classifier [6] + FC + Mean Weights + Full Batch",
+
+    "v1": "BS-Net-Classifier [6] + FC",
+    "v14": "BS-Net-Classifier [6] + Full Batch",
+    "v15": "BS-Net-Classifier [6] + Sigmoid",
+    "v13": "BS-Net-Classifier [6] + FC + BatchNorm",
+    "v11": "BS-Net-Classifier [6] + Full Batch",
+    "v12": "BS-Net-Classifier [6] + FC + Full Batch",
     "v35": "BS-Net-Classifier [6] + Mean Weights + Full Batch + FC"
 }
 
@@ -33,6 +44,9 @@ COLORS = {
     "v2": "#FF00FF",
     "v3": "#FFA500",
     "v35": "#008000",
+    "v12": "#8B8589",
+    "v14": "#9858b8",
+    "v15": "#ff7f0e",
 }
 
 
@@ -270,6 +284,21 @@ def get_summaries(d):
 if __name__ == "__main__":
     #plot_baseline(get_summaries("stored"))
     #plot_ablation(get_summaries("stored")+["results/v35_summary.csv"])
-    plot_ablation_oak(["results/v35_summary.csv"])
+    plot_ablation_oak([
+        # "results/bsnet_summary.csv",
+        # "results/v0_summary.csv",
+        "results/v1_summary.csv",
+        # "results/v11_summary.csv",
+        #"results/v12_summary.csv",
+        # "results/v13_summary.csv"
+        #"results/v15_summary.csv"
+        #"results/v2_summary.csv",
+        "results/v2_summary.csv",
+        # "results/v21_summary.csv",
+        # "results/v22_summary.csv",
+        # "results/v31_summary.csv",
+    ])
 
+#v0, v1, v2, v21
 
+#    "v12": "BS-Net-Classifier [6] + FC + Full Batch",
