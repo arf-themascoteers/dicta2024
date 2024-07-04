@@ -18,8 +18,7 @@ class TaskRunner:
         self.remove_bg = remove_bg
         self.tag = tag
         self.reporter = Reporter(self.tag, self.skip_all_bands)
-        self.cache = pd.DataFrame(columns=["dataset","algorithm",
-                                           "oa","aa","k","time","selected_features","selected_weights"])
+        self.cache = pd.DataFrame(columns=["dataset","algorithm","oa","aa","k","time","selected_features","selected_weights"])
 
     def evaluate(self):
         for dataset_name in self.task["datasets"]:
@@ -43,21 +42,23 @@ class TaskRunner:
     def get_results_for_a_case(self, algorithm:Algorithm):
         metric = self.get_from_cache(algorithm)
         if metric is not None:
-            print(f"Selected features got from cache for {algorithm.splits.get_name()} for size {algorithm.target_size} for for {algorithm.get_name()}")
+            print(f"Selected features got from cache for {algorithm.dataset.get_name()} for size {algorithm.target_size} for for {algorithm.get_name()}")
             algorithm.set_selected_indices(metric.selected_features)
             return algorithm.compute_performance()
-        print(f"Computing {algorithm.get_name()} {algorithm.splits.get_name()}")
+        print(f"Computing {algorithm.get_name()} {algorithm.dataset.get_name()}")
         metric = algorithm.compute_performance()
         self.save_to_cache(algorithm, metric)
         return metric
 
-    def save_to_cache(self, algorithm, metric:Metrics):
+    def save_to_cache(self, algorithm:Algorithm, metric:Metrics):
         if not algorithm.is_cacheable():
             return
         self.cache.loc[len(self.cache)] = {
-            "dataset":algorithm.splits.get_name(),
+            "dataset":algorithm.dataset.get_name(),
             "algorithm": algorithm.get_name(),
-            "time":metric.time,"oa":metric.oa,"aa":metric.aa,"k":metric.k, "selected_features":algorithm.get_all_indices()
+            "time":metric.time,"oa":metric.oa,"aa":metric.aa,"k":metric.k,
+            "selected_features":algorithm.get_all_indices(),
+            "selected_weights":algorithm.weights
         }
 
     def get_from_cache(self, algorithm:Algorithm):
@@ -66,7 +67,7 @@ class TaskRunner:
         if len(self.cache) == 0:
             return None
         rows = self.cache.loc[
-            (self.cache["dataset"] == algorithm.splits.get_name()) &
+            (self.cache["dataset"] == algorithm.dataset.get_name()) &
             (self.cache["algorithm"] == algorithm.get_name())
         ]
         if len(rows) == 0:
@@ -78,8 +79,7 @@ class TaskRunner:
 
     def evaluate_for_all_features(self, dataset):
         for fold, train_x, train_y, test_x, test_y in enumerate(dataset.get_k_folds()):
-            self.evaluate_for_all_features_fold(fold, dataset.get_name(), train_x, train_y, test_x, test_y)
+            oa, aa, k = train_test_evaluator.evaluate_split(train_x, train_y, test_x, test_y)
+            self.reporter.write_details_all_features(fold, dataset.get_name(), oa, aa, k)
 
-    def evaluate_for_all_features_fold(self, fold, name, train_x, train_y, test_x, test_y):
-        oa, aa, k = train_test_evaluator.evaluate_split(train_x, train_y, test_x, test_y)
-        self.reporter.write_details_all_features(fold, name, oa, aa, k)
+

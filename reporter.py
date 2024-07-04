@@ -61,18 +61,7 @@ class Reporter:
             file.write(f"{algorithm.splits.get_name()},{algorithm.target_size},{algorithm.get_name()},"
                        f"{time},{oa},{aa},{k},"
                        f"{'|'.join([str(i) for i in selected_features])},"
-                       f"{'|'.join([str(i) for i in selected_weights])},"
-                       f"{self.current_fold}\n")
-
-    def write_weights(self, algorithm):
-        if algorithm.weights is not None:
-            weights = algorithm.weights
-            if isinstance(weights, np.ndarray):
-                weights = torch.tensor(weights.copy(), dtype=torch.float64)
-            weights = torch.abs(weights)
-            weights = torch.sort(weights, descending=True)[0]
-            for i, w in enumerate(weights):
-                print(i + 1, round(w.item(), 4))
+                       f"{'|'.join([str(i) for i in selected_weights])}")
 
     def write_details_all_features(self, fold, name, oa, aa, k):
         oa = Reporter.sanitize_metric(oa)
@@ -103,16 +92,16 @@ class Reporter:
         df2.to_csv(self.all_features_summary_file, index=False)
 
     def get_saved_metrics(self, algorithm):
-        df = pd.read_csv(self.details_file)
+        df = pd.read_csv(self.summary_file)
         if len(df) == 0:
             return None
         rows = df.loc[(df["dataset"] == algorithm.splits.get_name()) & (df["target_size"] == algorithm.target_size) &
-                      (df["fold"] == self.current_fold) & (df["algorithm"] == algorithm.get_name())
+                      (df["algorithm"] == algorithm.get_name())
                       ]
         if len(rows) == 0:
             return None
         row = rows.iloc[0]
-        return Metrics(row["time"], row["oa"], row["aa"], row["k"], row["selected_features"])
+        return Metrics(row["time"], row["oa"], row["aa"], row["k"], row["selected_features"], row["selected_weights"])
 
     def save_results(self):
         os.makedirs(self.save_dir, exist_ok=True)
