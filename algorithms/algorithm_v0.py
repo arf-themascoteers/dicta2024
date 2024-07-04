@@ -101,7 +101,7 @@ class Algorithm_v0(Algorithm):
                 lambda_value = self.get_lambda(epoch+1)
                 loss = mse_loss + lambda_value*l1_loss
                 if batch_idx == 0 and self.epoch%10 == 0:
-                    self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,0, 0,loss)
+                    self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,loss)
                 loss.backward()
                 optimizer.step()
 
@@ -109,28 +109,13 @@ class Algorithm_v0(Algorithm):
         print("".join([str(i).ljust(10) for i in self.selected_indices]))
         return self.zhangnet, self.selected_indices
 
-    def report_stats(self, channel_weights, sparse_weights, epoch, mse_loss, l1_loss, lambda1, l2_loss, lambda2, loss):
-        # _, _,y_hat = self.zhangnet(self.X_train)
-        # yp = torch.argmax(y_hat, dim=1)
-        # yt = self.y_train.cpu().detach().numpy()
-        # yh = yp.cpu().detach().numpy()
-        # t_oa, t_aa, t_k = train_test_evaluator.calculate_metrics(yt, yh)
-        t_oa, t_aa, t_k = 0,0,0
-
-        # _, _,y_hat = self.zhangnet(self.X_val)
-        # yp = torch.argmax(y_hat, dim=1)
-        # yt = self.y_val.cpu().detach().numpy()
-        # yh = yp.cpu().detach().numpy()
-        # v_oa, v_aa, v_k = train_test_evaluator.calculate_metrics(yt, yh)
-        v_oa, v_aa, v_k = 0,0,0
-
+    def report_stats(self, channel_weights, sparse_weights, epoch, mse_loss, l1_loss, lambda1, loss):
         mean_weight = channel_weights
         means_sparse = sparse_weights
 
         if len(mean_weight.shape) > 1:
             mean_weight = torch.mean(mean_weight, dim=0)
             means_sparse = torch.mean(means_sparse, dim=0)
-
 
         min_cw = torch.min(mean_weight).item()
         min_s = torch.min(means_sparse).item()
@@ -145,9 +130,7 @@ class Algorithm_v0(Algorithm):
         mean_weight, all_bands, selected_bands = self.get_indices(channel_weights)
 
         oa, aa, k = train_test_evaluator.evaluate_split(self.splits, self)
-        self.reporter.report_epoch(epoch, mse_loss, l1_loss, lambda1, l2_loss,lambda2,loss,
-                                   t_oa, t_aa, t_k,
-                                   v_oa, v_aa, v_k,
+        self.reporter.report_epoch(epoch, mse_loss, l1_loss, lambda1,loss,
                                    oa, aa, k,
                                    min_cw, max_cw, avg_cw,
                                    min_s, max_s, avg_s,

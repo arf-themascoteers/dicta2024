@@ -166,9 +166,7 @@ class Reporter:
         self.current_fold = fold
         self.current_epoch_report_file = os.path.join("results", f"{tag}_{algorithm}_{dataset}_{target_size}_{self.current_fold}.csv")
 
-    def report_epoch(self, epoch, mse_loss, l1_loss, lambda_value, l2_loss, alpha, loss,
-                     t_oa,t_aa,t_k,
-                     v_oa,v_aa,v_k,
+    def report_epoch(self, epoch, mse_loss, l1_loss, lambda_value, loss,
                      oa,aa,k,
                      min_cw, max_cw, avg_cw,
                      min_s, max_s, avg_s,
@@ -179,9 +177,7 @@ class Reporter:
                 weight_labels = list(range(len(mean_weight)))
                 weight_labels = [f"weight_{i}" for i in weight_labels]
                 weight_labels = ",".join(weight_labels)
-                file.write(f"epoch,mse_loss,l1_loss,lambda_value,l2_loss,alpha,loss,"
-                           f"t_oa,t_aa,t_k,"
-                           f"v_oa,v_aa,v_k,"
+                file.write(f"epoch,mse_loss,l1_loss,lambda_value,loss,"
                            f"oa,aa,k,"
                            f"min_cw,max_cw,avg_cw,"
                            f"min_s,max_s,avg_s,"
@@ -197,9 +193,7 @@ class Reporter:
 
             file.write(f"{epoch},{Reporter.sanitize_metric(mse_loss)},"
                        f"{Reporter.sanitize_small(l1_loss)},{Reporter.sanitize_small(lambda_value)},"
-                       f"{Reporter.sanitize_small(l2_loss)},{Reporter.sanitize_small(alpha)},{Reporter.sanitize_metric(loss)},"
-                       f"{Reporter.sanitize_metric(t_oa)},{Reporter.sanitize_metric(t_aa)},{Reporter.sanitize_metric(t_k)},"
-                       f"{Reporter.sanitize_metric(v_oa)},{Reporter.sanitize_metric(v_aa)},{Reporter.sanitize_metric(v_k)},"                    
+                       f"{Reporter.sanitize_metric(loss)},"
                        f"{Reporter.sanitize_metric(oa)},{Reporter.sanitize_metric(aa)},{Reporter.sanitize_metric(k)},"
                        f"{Reporter.sanitize_weight(min_cw)},{Reporter.sanitize_weight(max_cw)},{Reporter.sanitize_weight(avg_cw)},"
                        f"{Reporter.sanitize_weight(min_s)},{Reporter.sanitize_weight(max_s)},{Reporter.sanitize_weight(avg_s)},"
