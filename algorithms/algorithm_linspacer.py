@@ -1,12 +1,11 @@
 from algorithm import Algorithm
 import linspacer
 import torch
-from data_splits import DataSplits
 
 
 class Algorithm_linspacer(Algorithm):
-    def __init__(self, target_size:int, splits:DataSplits, tag, reporter, verbose, fold):
-        super().__init__(target_size, splits, tag, reporter, verbose, fold)
+    def __init__(self, target_size:int, dataset, tag, reporter, verbose, fold):
+        super().__init__(target_size, dataset, tag, reporter, verbose, fold)
         self.indices = None
 
     def get_selected_indices(self):

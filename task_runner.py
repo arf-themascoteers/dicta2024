@@ -10,10 +10,9 @@ import numpy as np
 
 
 class TaskRunner:
-    def __init__(self, task, folds=1, tag="results", skip_all_bands=False, verbose=False, remove_bg=False):
+    def __init__(self, task, tag="results", skip_all_bands=False, verbose=False, remove_bg=False):
         torch.manual_seed(3)
         self.task = task
-        self.folds = folds
         self.skip_all_bands = skip_all_bands
         self.verbose = verbose
         self.remove_bg = remove_bg
@@ -24,15 +23,13 @@ class TaskRunner:
 
     def evaluate(self):
         for dataset_name in self.task["datasets"]:
-            dataset = DSManager(name=dataset_name, folds=self.folds, remove_bg=self.remove_bg)
+            dataset = DSManager(name=dataset_name, remove_bg=self.remove_bg)
             if not self.skip_all_bands:
                 self.evaluate_for_all_features(dataset)
-            for fold, splits in enumerate(dataset.get_k_folds()):
-                for algorithm in self.task["algorithms"]:
-                    for target_size in self.task["target_sizes"]:
-                        print(algorithm)
-                        algorithm_object = Algorithm.create(algorithm, target_size, splits, self.tag, self.reporter, self.verbose, fold)
-                        self.process_a_case(algorithm_object, fold)
+            for algorithm in self.task["algorithms"]:
+                for target_size in self.task["target_sizes"]:
+                    algorithm_object = Algorithm.create(algorithm, target_size, dataset, self.tag, self.reporter, self.verbose)
+                    self.process_a_case(algorithm_object)
 
         self.reporter.save_results()
         return self.reporter.get_summary(), self.reporter.get_details()
@@ -42,17 +39,6 @@ class TaskRunner:
         if metric is None:
             metric = self.get_results_for_a_case(algorithm, fold)
             self.reporter.write_details(algorithm, metric)
-            #self.print_weights(algorithm)
-
-    def print_weights(self, algorithm):
-        if algorithm.weights is not None:
-            weights = algorithm.weights
-            if isinstance(weights, np.ndarray):
-                weights = torch.tensor(weights.copy(), dtype=torch.float64)
-            weights = torch.abs(weights)
-            weights = torch.sort(weights, descending=True)[0]
-            for i, w in enumerate(weights):
-                print(i + 1, round(w.item(), 4))
 
     def get_results_for_a_case(self, algorithm:Algorithm, fold):
         metric = self.get_from_cache(algorithm, fold)

@@ -4,7 +4,6 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 import math
-from data_splits import DataSplits
 import train_test_evaluator
 
 
@@ -60,8 +59,8 @@ class ZhangNet(nn.Module):
 
 
 class Algorithm_v0(Algorithm):
-    def __init__(self, target_size:int, splits:DataSplits, tag, reporter, verbose, fold):
-        super().__init__(target_size, splits, tag, reporter, verbose, fold)
+    def __init__(self, target_size:int, dataset, tag, reporter, verbose, fold):
+        super().__init__(target_size, dataset, tag, reporter, verbose, fold)
         self.criterion = torch.nn.CrossEntropyLoss()
         self.class_size = len(np.unique(self.splits.train_y))
         self.last_layer_input = 100

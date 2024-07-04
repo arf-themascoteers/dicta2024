@@ -8,7 +8,7 @@ import importlib
 
 
 class Algorithm(ABC):
-    def __init__(self, target_size:int, splits:DataSplits, tag, reporter, verbose, fold):
+    def __init__(self, target_size:int, dataset, tag, reporter, verbose, fold):
         self.target_size = target_size
         self.splits = splits
         self.tag = tag
@@ -63,11 +63,11 @@ class Algorithm(ABC):
         return True
 
     @staticmethod
-    def create(name, target_size, splits, tag, reporter, verbose, fold):
+    def create(name, target_size, dataset, tag, reporter, verbose):
         class_name = f"Algorithm_{name}"
         module = importlib.import_module(f"algorithms.algorithm_{name}")
         clazz = getattr(module, class_name)
-        return clazz(target_size, splits, tag, reporter, verbose, fold)
+        return clazz(target_size, dataset, tag, reporter, verbose)
 
     def set_weights(self, mean_weight):
         self.weights = mean_weight

@@ -11,14 +11,11 @@ class Reporter:
         self.skip_all_bands = skip_all_bands
         self.summary_filename = f"{tag}_summary.csv"
         self.details_filename = f"{tag}_details.csv"
+        self.weights_filename = f"{tag}_weights.csv"
         self.save_dir = f"saved_results/{tag}"
         self.summary_file = os.path.join("results", self.summary_filename)
         self.details_file = os.path.join("results", self.details_filename)
-
-        self.current_fold = -1
-
-        self.current_epoch_report_file = None
-
+        self.weights_file = os.path.join("results", self.weights_filename)
         os.makedirs("results", exist_ok=True)
 
         if not os.path.exists(self.summary_file):
@@ -59,6 +56,17 @@ class Reporter:
             file.write(f"{algorithm.splits.get_name()},{algorithm.target_size},{algorithm.get_name()},"
                        f"{time},{oa},{aa},{k},{'|'.join([str(i) for i in metric.selected_features])},{self.current_fold}\n")
         self.update_summary(algorithm)
+
+
+    def write_weights(self, algorithm):
+        if algorithm.weights is not None:
+            weights = algorithm.weights
+            if isinstance(weights, np.ndarray):
+                weights = torch.tensor(weights.copy(), dtype=torch.float64)
+            weights = torch.abs(weights)
+            weights = torch.sort(weights, descending=True)[0]
+            for i, w in enumerate(weights):
+                print(i + 1, round(w.item(), 4))
 
     def update_summary(self, algorithm):
         df = pd.read_csv(self.details_file)

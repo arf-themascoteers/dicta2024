@@ -1,8 +1,6 @@
 from algorithm import Algorithm
-import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
-from data_splits import DataSplits
 import train_test_evaluator
 import torch
 
@@ -10,7 +8,6 @@ import torch
 class BSNetFC(nn.Module):
     def __init__(self, bands):
         super().__init__()
-        torch.manual_seed(3)
         self.bands = bands
         self.weighter = nn.Sequential(
             nn.BatchNorm1d(self.bands),
@@ -52,8 +49,8 @@ class BSNetFC(nn.Module):
 
 
 class Algorithm_bsnet(Algorithm):
-    def __init__(self, target_size:int, splits:DataSplits, tag, reporter, verbose, fold):
-        super().__init__(target_size, splits, tag, reporter, verbose, fold)
+    def __init__(self, target_size:int, dataset, tag, reporter, verbose, fold):
+        super().__init__(target_size, dataset, tag, reporter, verbose, fold)
         self.criterion = torch.nn.MSELoss(reduction='sum')
         self.epoch = -1
         self.bsnet = BSNetFC(self.splits.train_x.shape[1]).to(self.device)
