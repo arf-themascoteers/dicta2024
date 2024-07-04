@@ -11,6 +11,7 @@ import numpy as np
 
 class TaskRunner:
     def __init__(self, task, folds=1, tag="results", skip_all_bands=False, verbose=False, remove_bg=False):
+        torch.manual_seed(3)
         self.task = task
         self.folds = folds
         self.skip_all_bands = skip_all_bands
