@@ -86,8 +86,7 @@ class Algorithm_bsnet(Algorithm):
                 self.set_weights(mean_weight)
 
                 mse_loss = self.criterion(y_hat, y)
-                norms_for_all_batches = torch.norm(channel_weights, p=1, dim=1)
-                l1_loss = torch.mean(norms_for_all_batches)
+                l1_loss = torch.norm(channel_weights, p=1)/torch.numel(channel_weights)
                 loss = mse_loss + l1_loss * 0.01
                 if batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, channel_weights, epoch, mse_loss, l1_loss.item(), 0.01,loss)

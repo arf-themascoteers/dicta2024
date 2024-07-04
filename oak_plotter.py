@@ -179,7 +179,7 @@ def plot_ablation_oak(source, exclude=None, include=None, out_file="ab.png"):
     max_lim = max(df["oa"].max(), df["aa"].max(), df["k"].max()) + 0.02
     print(min_lim, max_lim)
     dest = os.path.join("saved_figs", f"{out_file}")
-    fig, axes = plt.subplots(ncols=3, figsize=(18, 12))
+    fig, axes = plt.subplots(ncols=3, figsize=(18, 10))
     for metric_index, metric in enumerate(["oa", "aa", "k"]):
         algorithm_counter = 0
         for algorithm_index, algorithm in enumerate(include):
