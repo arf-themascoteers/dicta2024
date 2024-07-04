@@ -8,7 +8,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import cohen_kappa_score
 from sklearn.metrics import confusion_matrix
 import numpy as np
-from data_splits import DataSplits
+
 
 
 def average_accuracy(y_true, y_pred):

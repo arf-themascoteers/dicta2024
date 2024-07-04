@@ -15,6 +15,7 @@ class Reporter:
         self.save_dir = f"saved_results/{tag}"
         self.summary_file = os.path.join("results", self.summary_filename)
         self.details_file = os.path.join("results", self.details_filename)
+        self.current_epoch_report_file = None
         os.makedirs("results", exist_ok=True)
 
         if not os.path.exists(self.summary_file):
@@ -47,7 +48,10 @@ class Reporter:
     def get_details(self):
         return self.details_file
 
-    def write_summary(self, algorithm, metric:Metrics):
+    def write_oak(self, algorithm, dataset, target_size, oa, aa, k):
+        pass
+
+    def write_summary(self, algorithm, oas, aas, ks, metric:Metrics):
         time = Reporter.sanitize_metric(metric.time)
         oa = Reporter.sanitize_metric(metric.oa)
         aa = Reporter.sanitize_metric(metric.aa)
@@ -57,11 +61,16 @@ class Reporter:
         indices = np.argsort(selected_features)
         selected_features = selected_features[indices]
         selected_weights = selected_weights[indices]
-        with open(self.details_file, 'a') as file:
-            file.write(f"{algorithm.splits.get_name()},{algorithm.target_size},{algorithm.get_name()},"
+        with open(self.summary_file, 'a') as file:
+            file.write(f"{algorithm.dataset.get_name()},{algorithm.target_size},{algorithm.get_name()},"
                        f"{time},{oa},{aa},{k},"
                        f"{'|'.join([str(i) for i in selected_features])},"
                        f"{'|'.join([str(i) for i in selected_weights])}")
+
+        with open(self.details_file, 'a') as file:
+            for i in range(len(oas)):
+                file.write(f"{algorithm.dataset.get_name()},{algorithm.target_size},{algorithm.get_name()},"
+                       f"{round(oas[i],2)},{round(aa[i],2)},{round(k[i],2)},{i}")
 
     def write_details_all_features(self, fold, name, oa, aa, k):
         oa = Reporter.sanitize_metric(oa)
@@ -95,7 +104,7 @@ class Reporter:
         df = pd.read_csv(self.summary_file)
         if len(df) == 0:
             return None
-        rows = df.loc[(df["dataset"] == algorithm.splits.get_name()) & (df["target_size"] == algorithm.target_size) &
+        rows = df.loc[(df["dataset"] == algorithm.dataset.get_name()) & (df["target_size"] == algorithm.target_size) &
                       (df["algorithm"] == algorithm.get_name())
                       ]
         if len(rows) == 0:
@@ -129,9 +138,8 @@ class Reporter:
             metric = metric.item()
         return round(metric,7)
 
-    def create_epoch_report(self, tag, algorithm, dataset, target_size, fold):
-        self.current_fold = fold
-        self.current_epoch_report_file = os.path.join("results", f"{tag}_{algorithm}_{dataset}_{target_size}_{self.current_fold}.csv")
+    def create_epoch_report(self, tag, algorithm, dataset, target_size):
+        self.current_epoch_report_file = os.path.join("results", f"{tag}_{algorithm}_{dataset}_{target_size}.csv")
 
     def report_epoch(self, epoch, mse_loss, l1_loss, lambda_value, loss,
                      oa,aa,k,

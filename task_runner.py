@@ -34,21 +34,21 @@ class TaskRunner:
         return self.reporter.get_summary(), self.reporter.get_details()
 
     def process_a_case(self, algorithm:Algorithm):
-        metric = self.reporter.get_saved_metrics(algorithm)
+        oas, aas, ks, metric = self.reporter.get_saved_metrics(algorithm)
         if metric is None:
-            metric = self.get_results_for_a_case(algorithm)
-            self.reporter.write_summary(algorithm, metric)
+            oas, aas, ks, metric = self.get_results_for_a_case(algorithm)
+            self.reporter.write_summary(algorithm, oas, aas, ks, metric)
 
     def get_results_for_a_case(self, algorithm:Algorithm):
         metric = self.get_from_cache(algorithm)
         if metric is not None:
-            print(f"Selected features got from cache for {algorithm.dataset.get_name()} for size {algorithm.target_size} for for {algorithm.get_name()}")
+            print(f"Selected features got from cache for {algorithm.dataset.get_name()} for size {algorithm.target_size} for {algorithm.get_name()}")
             algorithm.set_selected_indices(metric.selected_features)
             return algorithm.compute_performance()
         print(f"Computing {algorithm.get_name()} {algorithm.dataset.get_name()}")
-        metric = algorithm.compute_performance()
+        oas, aas, ks, metric = algorithm.compute_performance()
         self.save_to_cache(algorithm, metric)
-        return metric
+        return oas, aas, ks, metric
 
     def save_to_cache(self, algorithm:Algorithm, metric:Metrics):
         if not algorithm.is_cacheable():

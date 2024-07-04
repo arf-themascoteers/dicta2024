@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 import math
-from data_splits import DataSplits
+
 import train_test_evaluator
 
 
@@ -122,7 +122,7 @@ class Algorithm_v21(Algorithm):
 
         mean_weight, all_bands, selected_bands = self.get_indices(channel_weights)
 
-        oa, aa, k = train_test_evaluator.evaluate_split(self.splits, self)
+        oa, aa, k = train_test_evaluator.evaluate_split(*self.dataset.get_a_fold(), self)
         self.reporter.report_epoch(epoch, mse_loss, l1_loss, lambda1,loss,
                                    oa, aa, k,
                                    min_cw, max_cw, avg_cw,

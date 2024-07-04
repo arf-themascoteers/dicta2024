@@ -4,7 +4,7 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 import math
-from data_splits import DataSplits
+
 import train_test_evaluator
 
 
@@ -56,20 +56,18 @@ class ZhangNet(nn.Module):
 
 
 class Algorithm_v4(Algorithm):
-    def __init__(self, target_size:int, splits:DataSplits, tag, reporter, verbose, fold):
-        super().__init__(target_size, splits, tag, reporter, verbose, fold)
+    def __init__(self, target_size:int, dataset, tag, reporter, verbose, fold):
+        super().__init__(target_size, dataset, tag, reporter, verbose, fold)
         self.criterion = torch.nn.CrossEntropyLoss()
-        self.class_size = len(np.unique(self.splits.train_y))
+        self.class_size = len(np.unique(self.dataset.get_train_y()))
         self.last_layer_input = 100
-        if self.splits.name == "paviaU":
+        if self.dataset.name == "paviaU":
             self.last_layer_input = 48
-        self.zhangnet = ZhangNet(self.splits.train_x.shape[1], self.class_size, self.last_layer_input).to(self.device)
+        self.zhangnet = ZhangNet(self.dataset.get_train_x().shape[1], self.class_size, self.last_layer_input).to(self.device)
         self.total_epoch = 500
         self.epoch = -1
-        self.X_train = torch.tensor(self.splits.train_x, dtype=torch.float32).to(self.device)
-        self.y_train = torch.tensor(self.splits.train_y, dtype=torch.int32).to(self.device)
-        self.X_val = torch.tensor(self.splits.validation_x, dtype=torch.float32).to(self.device)
-        self.y_val = torch.tensor(self.splits.validation_y, dtype=torch.int32).to(self.device)
+        self.X_train = torch.tensor(self.dataset.get_train_x(), dtype=torch.float32).to(self.device)
+        self.y_train = torch.tensor(self.dataset.get_train_y(), dtype=torch.int32).to(self.device)
 
     def get_selected_indices(self):
         optimizer = torch.optim.Adam(self.zhangnet.parameters(), lr=0.001, betas=(0.9,0.999))
@@ -125,7 +123,7 @@ class Algorithm_v4(Algorithm):
 
         mean_weight, all_bands, selected_bands = self.get_indices(channel_weights)
 
-        oa, aa, k = train_test_evaluator.evaluate_split(self.splits, self)
+        oa, aa, k = train_test_evaluator.evaluate_split(*self.dataset.get_a_fold(), self)
         self.reporter.report_epoch(epoch, mse_loss, l1_loss, lambda1,loss,
                                    oa, aa, k,
                                    min_cw, max_cw, avg_cw,

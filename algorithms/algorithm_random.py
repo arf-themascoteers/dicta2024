@@ -1,6 +1,6 @@
 from algorithm import Algorithm
 import torch
-from data_splits import DataSplits
+
 
 
 class Algorithm_random(Algorithm):
@@ -9,7 +9,7 @@ class Algorithm_random(Algorithm):
         self.indices = None
 
     def get_selected_indices(self):
-        original_size = self.splits.train_x.shape[1]
+        original_size = self.dataset.get_train_x().shape[1]
         self.indices = torch.randperm(original_size)[:self.target_size].sort().values.tolist()
         return self, self.indices
 

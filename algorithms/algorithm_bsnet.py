@@ -53,16 +53,15 @@ class Algorithm_bsnet(Algorithm):
         super().__init__(target_size, dataset, tag, reporter, verbose, fold)
         self.criterion = torch.nn.MSELoss(reduction='sum')
         self.epoch = -1
-        self.bsnet = BSNetFC(self.splits.train_x.shape[1]).to(self.device)
-        self.X_train = torch.tensor(self.splits.train_x, dtype=torch.float32).to(self.device)
-        self.y_train = torch.tensor(self.splits.train_x, dtype=torch.int32).to(self.device)
-        self.X_val = torch.tensor(self.splits.validation_x, dtype=torch.float32).to(self.device)
-        self.y_val = torch.tensor(self.splits.validation_x, dtype=torch.int32).to(self.device)
+        x,y = self.dataset.get_train_x_y()
+        self.bsnet = BSNetFC(x.shape[1]).to(self.device)
+        self.X_train = torch.tensor(x, dtype=torch.float32).to(self.device)
+        self.y_train = torch.tensor(y, dtype=torch.int32).to(self.device)
 
     def get_selected_indices(self):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         optimizer = torch.optim.Adam(self.bsnet.parameters(), lr=0.00002)
-        X_train = torch.tensor(self.splits.train_x, dtype=torch.float32).to(device)
+        X_train = self.X_train
         dataset = TensorDataset(X_train, X_train)
         dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
         channel_weights = None
@@ -85,7 +84,7 @@ class Algorithm_bsnet(Algorithm):
                 mse_loss = self.criterion(y_hat, y)
                 l1_loss = torch.norm(channel_weights, p=1)/torch.numel(channel_weights)
                 loss = mse_loss + l1_loss * 0.01
-                if batch_idx == 0 and self.epoch%10 == 0:
+                if self.verbose and batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, channel_weights, epoch, mse_loss, l1_loss.item(), 0.01,loss)
                 loss.backward()
                 optimizer.step()
@@ -115,7 +114,7 @@ class Algorithm_bsnet(Algorithm):
 
         mean_weight, all_bands, selected_bands = self.get_indices(channel_weights)
 
-        oa, aa, k = train_test_evaluator.evaluate_split(self.splits, self)
+        oa, aa, k = train_test_evaluator.evaluate_split(*self.dataset.get_a_fold(), self)
         self.reporter.report_epoch(epoch, mse_loss, l1_loss, lambda1, loss,
                                    oa, aa, k,
                                    min_cw, max_cw, avg_cw,

@@ -24,14 +24,26 @@ class DSManager:
     def get_train_data(self):
         return self.bs_train
 
+    def get_train_x_y(self):
+        return self.get_train_x(), self.get_train_y()
+
+    def get_train_x(self):
+        return self.bs_train[:,0:-1]
+
+    def get_train_y(self):
+        return self.bs_train[:, -1]
+
     def get_foreground_data(self):
         return self.foreground_data
 
     def get_k_folds(self):
         for i in range(20):
             seed = 40 + i
-            train_x, test_x, train_y, test_y = train_test_split(self.foreground_data[:.0:-1], self.foreground_data[:-1], test_size=0.95, random_state=seed, stratify=self.foreground_data[:,-1])
-            yield train_x, train_y, test_x, test_y
+            yield self.get_a_fold(seed)
+
+    def get_a_fold(self, seed=50):
+        return train_test_split(self.foreground_data[:.0:-1], self.foreground_data[:-1], test_size=0.95, random_state=seed,
+                         stratify=self.foreground_data[:, -1])
 
     def __repr__(self):
         return self.get_name()
