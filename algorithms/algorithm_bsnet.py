@@ -90,7 +90,7 @@ class Algorithm_bsnet(Algorithm):
                 l1_loss = torch.mean(norms_for_all_batches)
                 loss = mse_loss + l1_loss * 0.01
                 if batch_idx == 0 and self.epoch%10 == 0:
-                    self.report_stats(channel_weights, channel_weights, epoch, mse_loss, l1_loss.item(), 0.01,0, 0,loss)
+                    self.report_stats(channel_weights, channel_weights, epoch, mse_loss, l1_loss.item(), 0.01,loss)
                 loss.backward()
                 optimizer.step()
             print(f"Epoch={epoch} MSE={round(mse_loss.item(), 5)}, L1={round(l1_loss.item(), 5)}, LOSS={round(loss.item(), 5)}")
@@ -99,26 +99,13 @@ class Algorithm_bsnet(Algorithm):
         print("".join([str(i).ljust(10) for i in self.selected_indices]))
         return self.bsnet, self.selected_indices
 
-    def report_stats(self, channel_weights, sparse_weights, epoch, mse_loss, l1_loss, lambda1, l2_loss, lambda2, loss):
-        # cw,y_hat = self.bsnet(self.X_train)
-        # yp = torch.argmax(y_hat, dim=1)
-        # yt = self.y_train.cpu().detach().numpy()
-        # yh = yp.cpu().detach().numpy()
-        t_oa, t_aa, t_k = 0,0,0#train_test_evaluator.calculate_metrics(yt, yh)
-
-        # cw,y_hat = self.bsnet(self.X_val)
-        # yp = torch.argmax(y_hat, dim=1)
-        # yt = self.y_val.cpu().detach().numpy()
-        # yh = yp.cpu().detach().numpy()
-        v_oa, v_aa, v_k = 0,0,0#train_test_evaluator.calculate_metrics(yt, yh)
-
+    def report_stats(self, channel_weights, sparse_weights, epoch, mse_loss, l1_loss, lambda1, loss):
         mean_weight = channel_weights
         means_sparse = sparse_weights
 
         if len(mean_weight.shape) > 1:
             mean_weight = torch.mean(mean_weight, dim=0)
             means_sparse = torch.mean(means_sparse, dim=0)
-
 
         min_cw = torch.min(mean_weight).item()
         min_s = torch.min(means_sparse).item()
@@ -133,9 +120,7 @@ class Algorithm_bsnet(Algorithm):
         mean_weight, all_bands, selected_bands = self.get_indices(channel_weights)
 
         oa, aa, k = train_test_evaluator.evaluate_split(self.splits, self)
-        self.reporter.report_epoch(epoch, mse_loss, l1_loss, lambda1, l2_loss,lambda2,loss,
-                                   t_oa, t_aa, t_k,
-                                   v_oa, v_aa, v_k,
+        self.reporter.report_epoch(epoch, mse_loss, l1_loss, lambda1, loss,
                                    oa, aa, k,
                                    min_cw, max_cw, avg_cw,
                                    min_s, max_s, avg_s,
