@@ -3,6 +3,7 @@ import pandas as pd
 from metrics import Metrics
 import torch
 import shutil
+import numpy as np
 
 
 class Reporter:
@@ -11,34 +12,34 @@ class Reporter:
         self.skip_all_bands = skip_all_bands
         self.summary_filename = f"{tag}_summary.csv"
         self.details_filename = f"{tag}_details.csv"
-        self.weights_filename = f"{tag}_weights.csv"
         self.save_dir = f"saved_results/{tag}"
         self.summary_file = os.path.join("results", self.summary_filename)
         self.details_file = os.path.join("results", self.details_filename)
-        self.weights_file = os.path.join("results", self.weights_filename)
         os.makedirs("results", exist_ok=True)
 
         if not os.path.exists(self.summary_file):
             with open(self.summary_file, 'w') as file:
-                file.write("dataset,target_size,algorithm,time,oa,aa,k,selected_features\n")
+                file.write("dataset,target_size,algorithm,time,oa,aa,k,selected_features,selected_weights\n")
 
         if not os.path.exists(self.details_file):
             with open(self.details_file, 'w') as file:
-                file.write("dataset,target_size,algorithm,time,oa,aa,k,selected_features,fold\n")
+                file.write("dataset,target_size,algorithm,oa,aa,k,fold\n")
 
-        if not self.skip_all_bands:
-            self.all_features_details_filename = f"{tag}_all_features_details.csv"
-            self.all_features_summary_filename = f"{tag}_all_features_summary.csv"
-            self.all_features_summary_file = os.path.join("results", self.all_features_summary_filename)
-            self.all_features_details_file = os.path.join("results", self.all_features_details_filename)
+        if self.skip_all_bands:
+            return
 
-            if not os.path.exists(self.all_features_summary_file):
-                with open(self.all_features_summary_file, 'w') as file:
-                    file.write("dataset,oa,aa,k\n")
+        self.all_features_details_filename = f"{tag}_all_features_details.csv"
+        self.all_features_summary_filename = f"{tag}_all_features_summary.csv"
+        self.all_features_summary_file = os.path.join("results", self.all_features_summary_filename)
+        self.all_features_details_file = os.path.join("results", self.all_features_details_filename)
 
-            if not os.path.exists(self.all_features_details_file):
-                with open(self.all_features_details_file, 'w') as file:
-                    file.write("fold,dataset,oa,aa,k\n")
+        if not os.path.exists(self.all_features_summary_file):
+            with open(self.all_features_summary_file, 'w') as file:
+                file.write("dataset,oa,aa,k\n")
+
+        if not os.path.exists(self.all_features_details_file):
+            with open(self.all_features_details_file, 'w') as file:
+                file.write("fold,dataset,oa,aa,k\n")
 
     def get_summary(self):
         return self.summary_file
@@ -46,17 +47,22 @@ class Reporter:
     def get_details(self):
         return self.details_file
 
-    def write_details(self, algorithm, metric:Metrics):
+    def write_summary(self, algorithm, metric:Metrics):
         time = Reporter.sanitize_metric(metric.time)
         oa = Reporter.sanitize_metric(metric.oa)
         aa = Reporter.sanitize_metric(metric.aa)
         k = Reporter.sanitize_metric(metric.k)
-        metric.selected_features = sorted(metric.selected_features)
+        selected_features = np.array(metric.selected_features)
+        selected_weights = np.array(metric.selected_weights)
+        indices = np.argsort(selected_features)
+        selected_features = selected_features[indices]
+        selected_weights = selected_weights[indices]
         with open(self.details_file, 'a') as file:
             file.write(f"{algorithm.splits.get_name()},{algorithm.target_size},{algorithm.get_name()},"
-                       f"{time},{oa},{aa},{k},{'|'.join([str(i) for i in metric.selected_features])},{self.current_fold}\n")
-        self.update_summary(algorithm)
-
+                       f"{time},{oa},{aa},{k},"
+                       f"{'|'.join([str(i) for i in selected_features])},"
+                       f"{'|'.join([str(i) for i in selected_weights])},"
+                       f"{self.current_fold}\n")
 
     def write_weights(self, algorithm):
         if algorithm.weights is not None:
@@ -68,39 +74,13 @@ class Reporter:
             for i, w in enumerate(weights):
                 print(i + 1, round(w.item(), 4))
 
-    def update_summary(self, algorithm):
-        df = pd.read_csv(self.details_file)
-        df = df[(df["dataset"] == algorithm.splits.get_name()) & (df["algorithm"] == algorithm.get_name()) & (df["target_size"] == algorithm.target_size)]
-        if len(df) == 0:
-            return
-        time = round(df["time"].mean(), 2)
-        oa = Reporter.sanitize_metric(df["oa"].mean())
-        aa = Reporter.sanitize_metric(df["aa"].mean())
-        k = Reporter.sanitize_metric(df["k"].mean())
-        selected_features = '||'.join(df['selected_features'].astype(str))
-
-        df2 = pd.read_csv(self.summary_file)
-        mask = ((df2["dataset"] == algorithm.splits.get_name()) & (df2["target_size"] == algorithm.target_size) & (df2["algorithm"] == algorithm.get_name()))
-        if len(df2[mask]) == 0:
-            df2.loc[len(df2)] = {
-                "dataset":algorithm.splits.get_name(), "target_size":algorithm.target_size, "algorithm": algorithm.get_name(),
-                "time":time,"oa":oa,"aa":aa,"k":k, "selected_features":selected_features
-            }
-        else:
-            df2.loc[mask, 'time'] = time
-            df2.loc[mask, 'oa'] = oa
-            df2.loc[mask, 'aa'] = aa
-            df2.loc[mask, 'k'] = k
-            df2.loc[mask, 'selected_features'] = selected_features
-        df2.to_csv(self.summary_file, index=False)
-
-    def write_details_all_features(self, fold, dataset, oa, aa, k):
+    def write_details_all_features(self, fold, name, oa, aa, k):
         oa = Reporter.sanitize_metric(oa)
         aa = Reporter.sanitize_metric(aa)
         k = Reporter.sanitize_metric(k)
         with open(self.all_features_details_file, 'a') as file:
-            file.write(f"{fold},{dataset},{oa},{aa},{k}\n")
-        self.update_summary_for_all_features(dataset)
+            file.write(f"{fold},{name},{oa},{aa},{k}\n")
+        self.update_summary_for_all_features(name)
 
     def update_summary_for_all_features(self, dataset):
         df = pd.read_csv(self.all_features_details_file)
@@ -133,16 +113,6 @@ class Reporter:
             return None
         row = rows.iloc[0]
         return Metrics(row["time"], row["oa"], row["aa"], row["k"], row["selected_features"])
-
-    def get_saved_metrics_for_all_feature(self, dataset):
-        df = pd.read_csv(self.all_features_details_file)
-        if len(df) == 0:
-            return None, None, None
-        rows = df.loc[(df['fold'] == self.current_fold) & (df['dataset'] == dataset)]
-        if len(rows) == 0:
-            return None, None, None
-        row = rows.iloc[0]
-        return row["oa"], row["aa"], row["k"]
 
     def save_results(self):
         os.makedirs(self.save_dir, exist_ok=True)

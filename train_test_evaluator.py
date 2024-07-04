@@ -30,14 +30,11 @@ def evaluate_train_test_pair(train_x, train_y, test_x, test_y):
     return calculate_metrics(test_y, y_pred)
 
 
-def evaluate_split(split:DataSplits, transform=None):
-    if transform is None:
-        train_x = split.train_x
-        test_x = split.test_x
-    else:
-        train_x = transform.transform(split.train_x)
-        test_x = transform.transform(split.test_x)
-    return evaluate_train_test_pair(train_x, split.train_y, test_x, split.test_y)
+def evaluate_split(train_x, train_y, test_x, test_y, transform=None):
+    if transform is not None:
+        train_x = transform.transform(train_x)
+        test_x = transform.transform(test_x)
+    return evaluate_train_test_pair(train_x, train_y, test_x, test_y)
 
 
 def calculate_metrics(y_test, y_pred):

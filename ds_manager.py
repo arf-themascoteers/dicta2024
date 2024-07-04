@@ -1,6 +1,5 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from data_splits import DataSplits
 from sklearn.preprocessing import minmax_scale
 
 
@@ -32,7 +31,7 @@ class DSManager:
         for i in range(20):
             seed = 40 + i
             train_x, test_x, train_y, test_y = train_test_split(self.foreground_data[:.0:-1], self.foreground_data[:-1], test_size=0.95, random_state=seed, stratify=self.foreground_data[:,-1])
-            yield DataSplits(self.name, self.bs_train[:,0:-1], self.bs_train[:, -1], train_x, train_y, test_x, test_y)
+            yield train_x, train_y, test_x, test_y
 
     def __repr__(self):
         return self.get_name()

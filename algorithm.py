@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from data_splits import DataSplits
 from metrics import Metrics
 from datetime import datetime
 import train_test_evaluator
@@ -10,7 +9,7 @@ import importlib
 class Algorithm(ABC):
     def __init__(self, target_size:int, dataset, tag, reporter, verbose, fold):
         self.target_size = target_size
-        self.splits = splits
+        self.dataset = dataset
         self.tag = tag
         self.reporter = reporter
         self.verbose = verbose
@@ -18,7 +17,7 @@ class Algorithm(ABC):
         self.weights = None
         self.model = None
         self.all_indices = None
-        self.reporter.create_epoch_report(tag, self.get_name(), self.splits.get_name(), self.target_size, fold)
+        self.reporter.create_epoch_report(tag, self.get_name(), self.dataset.get_name(), self.target_size, fold)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def fit(self):
@@ -38,8 +37,18 @@ class Algorithm(ABC):
         if self.selected_indices is None:
             self.fit()
         elapsed_time = (datetime.now() - start_time).total_seconds()
-        oa, aa, k = train_test_evaluator.evaluate_split(self.splits, self)
-        return Metrics(elapsed_time, oa, aa, k, self.selected_indices)
+        oas = []
+        aas = []
+        ks = []
+        for fold, train_x, train_y, test_x, test_y in enumerate(self.dataset.get_k_folds()):
+            oa, aa, k = train_test_evaluator.evaluate_split(train_x, train_y, test_x, test_y)
+            oas.append(oa)
+            aas.append(aa)
+            ks.append(k)
+        oa = sum(oas) / len(oas)
+        aa = sum(aas) / len(aas)
+        k = sum(aas) / len(ks)
+        return Metrics(elapsed_time, oa, aa, k, self.selected_indices, self.weights)
 
     @abstractmethod
     def get_selected_indices(self):
