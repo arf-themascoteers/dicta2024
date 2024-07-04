@@ -74,7 +74,7 @@ class Algorithm_v4(Algorithm):
     def get_selected_indices(self):
         optimizer = torch.optim.Adam(self.zhangnet.parameters(), lr=0.001, betas=(0.9,0.999))
         dataset = TensorDataset(self.X_train, self.y_train)
-        dataloader = DataLoader(dataset, batch_size=128000, shuffle=True)
+        dataloader = DataLoader(dataset, batch_size=1280000, shuffle=True)
         channel_weights = None
         loss = 0
         l1_loss = 0

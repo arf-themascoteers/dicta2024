@@ -11,11 +11,13 @@ import train_test_evaluator
 class Sparse(nn.Module):
     def __init__(self):
         super().__init__()
-        self.k = 0.1
 
-    def forward(self, X):
-        X = torch.where(torch.abs(X) < self.k, 0, X)
+    def forward(self, X, epoch):
+        X = torch.where(torch.abs(X) < self.get_k(epoch), 0, X)
         return X
+
+    def get_k(self, epoch):
+        return 0.2
 
 
 class ZhangNet(nn.Module):
@@ -27,39 +29,34 @@ class ZhangNet(nn.Module):
         self.last_layer_input = last_layer_input
         self.weighter = nn.Sequential(
             nn.Linear(self.bands, 512),
+            nn.BatchNorm1d(512),
             nn.ReLU(),
-            nn.Linear(512, self.bands)
+            nn.Linear(512, self.bands),
+            nn.Sigmoid()
         )
         self.classnet = nn.Sequential(
-            nn.Conv1d(1,16,kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm1d(16),
+            nn.Linear(self.bands, 300),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
-            nn.Conv1d(16, 8, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm1d(8),
+            nn.BatchNorm1d(300),
+            nn.Linear(300, 200),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
-            nn.Conv1d(8, 4, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm1d(4),
-            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
-            nn.Flatten(start_dim=1),
-            nn.Linear(last_layer_input,self.number_of_classes)
+            nn.BatchNorm1d(200),
+            nn.Linear(200, self.number_of_classes),
         )
         self.sparse = Sparse()
         num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
         print("Number of learnable parameters:", num_params)
 
-    def forward(self, X):
+    def forward(self, X, epoch):
         channel_weights = self.weighter(X)
         channel_weights = torch.mean(channel_weights, dim=0)
-        sparse_weights = self.sparse(channel_weights)
+        sparse_weights = self.sparse(channel_weights, epoch)
         reweight_out = X * sparse_weights
-        reweight_out = reweight_out.reshape(reweight_out.shape[0],1,reweight_out.shape[1])
         output = self.classnet(reweight_out)
         return channel_weights, sparse_weights, output
 
 
-class Algorithm_v3(Algorithm):
+class Algorithm_v35(Algorithm):
     def __init__(self, target_size:int, splits:DataSplits, tag, reporter, verbose, fold):
         super().__init__(target_size, splits, tag, reporter, verbose, fold)
         self.criterion = torch.nn.CrossEntropyLoss()
@@ -88,7 +85,7 @@ class Algorithm_v3(Algorithm):
             self.epoch = epoch
             for batch_idx, (X, y) in enumerate(dataloader):
                 optimizer.zero_grad()
-                channel_weights, sparse_weights, y_hat = self.zhangnet(X)
+                channel_weights, sparse_weights, y_hat = self.zhangnet(X, epoch)
                 deciding_weights = channel_weights
                 mean_weight, all_bands, selected_bands = self.get_indices(deciding_weights)
                 self.set_all_indices(all_bands)
@@ -110,14 +107,14 @@ class Algorithm_v3(Algorithm):
         return self.zhangnet, self.selected_indices
 
     def report_stats(self, channel_weights, sparse_weights, epoch, mse_loss, l1_loss, lambda1, l2_loss, lambda2, loss):
-        # _, _,y_hat = self.zhangnet(self.X_train)
+        # _, _,y_hat = self.zhangnet(self.X_train, epoch)
         # yp = torch.argmax(y_hat, dim=1)
         # yt = self.y_train.cpu().detach().numpy()
         # yh = yp.cpu().detach().numpy()
         # t_oa, t_aa, t_k = train_test_evaluator.calculate_metrics(yt, yh)
         t_oa, t_aa, t_k = 0,0,0
 
-        # _, _,y_hat = self.zhangnet(self.X_val)
+        # _, _,y_hat = self.zhangnet(self.X_val, epoch)
         # yp = torch.argmax(y_hat, dim=1)
         # yt = self.y_val.cpu().detach().numpy()
         # yh = yp.cpu().detach().numpy()
@@ -167,11 +164,10 @@ class Algorithm_v3(Algorithm):
         return mean_weights, band_indx, band_indx[: self.target_size]
 
     def l1_loss(self, channel_weights):
-        channel_weights = torch.abs(channel_weights)
-        return torch.mean(channel_weights)
+        return torch.norm(channel_weights, 1)
 
     def get_lambda(self, epoch):
-        return 0.01 * math.exp(-epoch/self.total_epoch)
+        return 0.001 * math.exp(-epoch/self.total_epoch)
 
 
 
