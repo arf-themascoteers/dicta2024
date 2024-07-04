@@ -1,17 +1,13 @@
+import os
 import pandas as pd
-import numpy as np
 
-df = pd.read_csv("data/indian_pines.csv")
-data = df.to_numpy()
-print("toal",data.shape[0])
-
-classes = np.unique(data[:,-1])
-
-total = 0
-
-for c in classes:
-    cnt = len(data[data[:,-1]==c])
-    print(c,cnt)
-    total=total+cnt
-
-print("rec total", total)
+for f in os.listdir("data"):
+    if not f.endswith(".csv"):
+        continue
+    p = os.path.join("data", f)
+    df = pd.read_csv(p)
+    unique_values_count = df.iloc[:, -1].value_counts()
+    print(f)
+    print(len(df))
+    print(len(df.columns)-1)
+    print(unique_values_count)
