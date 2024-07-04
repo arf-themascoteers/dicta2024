@@ -53,7 +53,7 @@ class ZhangNet(nn.Module):
         return channel_weights, sparse_weights, output
 
 
-class Algorithm_v31(Algorithm):
+class Algorithm_v3(Algorithm):
     def __init__(self, target_size:int, dataset, tag, reporter, verbose, fold):
         super().__init__(target_size, dataset, tag, reporter, verbose, fold)
         self.criterion = torch.nn.CrossEntropyLoss()
@@ -122,7 +122,8 @@ class Algorithm_v31(Algorithm):
         mean_weight, all_bands, selected_bands = self.get_indices(channel_weights)
 
         oa, aa, k = train_test_evaluator.evaluate_split(*self.dataset.get_a_fold(), self)
-        self.reporter.report_epoch(epoch, mse_loss, l1_loss, lambda1,loss,
+        if self.verbose:
+            self.reporter.report_epoch(epoch, mse_loss, l1_loss, lambda1,loss,
                                    oa, aa, k,
                                    min_cw, max_cw, avg_cw,
                                    min_s, max_s, avg_s,
