@@ -11,13 +11,11 @@ import train_test_evaluator
 class Sparse(nn.Module):
     def __init__(self):
         super().__init__()
+        self.k = 0.1
 
-    def forward(self, X, epoch):
-        X = torch.where(torch.abs(X) < self.get_k(epoch), 0, X)
+    def forward(self, X):
+        X = torch.where(torch.abs(X) < self.k, 0, X)
         return X
-
-    def get_k(self, epoch):
-        return 0.2
 
 
 class ZhangNet(nn.Module):
@@ -46,10 +44,10 @@ class ZhangNet(nn.Module):
         num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
         print("Number of learnable parameters:", num_params)
 
-    def forward(self, X, epoch):
+    def forward(self, X):
         channel_weights = self.weighter(X)
         channel_weights = torch.mean(channel_weights, dim=0)
-        sparse_weights = self.sparse(channel_weights, epoch)
+        sparse_weights = self.sparse(channel_weights)
         reweight_out = X * sparse_weights
         output = self.classnet(reweight_out)
         return channel_weights, sparse_weights, output
@@ -84,7 +82,7 @@ class Algorithm_v4(Algorithm):
             self.epoch = epoch
             for batch_idx, (X, y) in enumerate(dataloader):
                 optimizer.zero_grad()
-                channel_weights, sparse_weights, y_hat = self.zhangnet(X, epoch)
+                channel_weights, sparse_weights, y_hat = self.zhangnet(X)
                 deciding_weights = channel_weights
                 mean_weight, all_bands, selected_bands = self.get_indices(deciding_weights)
                 self.set_all_indices(all_bands)
@@ -166,7 +164,7 @@ class Algorithm_v4(Algorithm):
         return torch.norm(channel_weights, 1)
 
     def get_lambda(self, epoch):
-        return 0.001 * math.exp(-epoch/self.total_epoch)
+        return 0.0001 * math.exp(-epoch/self.total_epoch)
 
 
 

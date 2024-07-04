@@ -5,14 +5,15 @@ import os
 
 ALGS = {
     "v0": "BS-Net-Classifier [6]",
-    "v4": "Proposed Algorithm",
+    "v4": "BS-Net-Classifier [6] + Mean Weights + Full Batch + FC + Removed Sigmoid(Proposed)",
     "all": "All Bands",
     "mcuve": "MCUVE [10]",
     "bsnet": "BS-Net-FC [5]",
     "pcal": "PCA-loading [11]",
-    "v3": "Proposed Algorithm excluding FC",
-    "v2": "Proposed Algorithm excluding FC, Sigmoid",
-    "v1": "Proposed Algorithm excluding FC, Sigmoid, Full-batch"
+    "v3": "BS-Net-Classifier [6] + Mean Weights + Full Batch + Removed Sigmoid",
+    "v2": "BS-Net-Classifier [6] + Mean Weights + Full Batch",
+    "v1": "BS-Net-Classifier [6] + Mean Weights",
+    "v35": "BS-Net-Classifier [6] + Mean Weights + Full Batch + FC"
 }
 
 DSS = {
@@ -28,9 +29,10 @@ COLORS = {
     "mcuve": "#ff7f0e",
     "bsnet": "#008000",
     "pcal": "#9467bd",
-    "v1": "#e377c2",
-    "v2": "#bcbd22",
-    "v3": "#17becf"
+    "v1": "#7FFF00",
+    "v2": "#FF00FF",
+    "v3": "#FFA500",
+    "v35": "#008000",
 }
 
 
@@ -142,6 +144,98 @@ def plot_oak(source, exclude=None, include=None, out_file="baseline.png"):
         plt.close(fig)
 
 
+def plot_ablation_oak(source, exclude=None, include=None, out_file="ab.png"):
+    if exclude is None:
+        exclude = []
+    os.makedirs("saved_figs", exist_ok=True)
+    if isinstance(source, str):
+        df = sanitize_df(pd.read_csv(source))
+    else:
+        df = [sanitize_df(pd.read_csv(loc)) for loc in source]
+        df = pd.concat(df, axis=0, ignore_index=True)
+
+    df = df[df["dataset"] == "indian_pines"]
+    df.to_csv(os.path.join("saved_figs", "source.split.csv"), index=False)
+    colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22",
+              "#17becf"]
+    markers = ['s', 'P', 'D', '^', 'o', '*', '.']
+    labels = ["Overall Accuracy (OA)", "Average Accuracy (AA)", r"Cohen's kappa ($\kappa$)"]
+
+    min_lim = 0.3
+    max_lim = 1
+
+    order = ["all", "pcal", "mcuve", "bsnet", "v0", "v1", "v2", "v3", "v35", "v4"]
+    df["sort_order"] = df["algorithm"].apply(lambda x: order.index(x) if x in order else len(order) + ord(x[0]))
+    df = df.sort_values("sort_order").drop(columns=["sort_order"])
+
+    algorithms = df["algorithm"].unique()
+
+    if include is None:
+        include = algorithms
+
+    include = [x for x in include if x not in exclude]
+    df = df[df["algorithm"].isin(include)]
+    min_lim = min(df["oa"].min(), df["aa"].min(), df["k"].min()) - 0.02
+    max_lim = max(df["oa"].max(), df["aa"].max(), df["k"].max()) + 0.02
+    print(min_lim, max_lim)
+    dest = os.path.join("saved_figs", f"{out_file}")
+    fig, axes = plt.subplots(ncols=3, figsize=(18, 12))
+    for metric_index, metric in enumerate(["oa", "aa", "k"]):
+        algorithm_counter = 0
+        for algorithm_index, algorithm in enumerate(include):
+            algorithm_label = algorithm
+            if algorithm in ALGS:
+                algorithm_label = ALGS[algorithm]
+            alg_df = df[df["algorithm"] == algorithm]
+            alg_df = alg_df.sort_values(by='target_size')
+            linestyle = "-"
+            if algorithm in COLORS:
+                color = COLORS[algorithm]
+            else:
+                color = colors[algorithm_counter]
+
+            marker = markers[algorithm_counter]
+            if algorithm == "all":
+                oa = alg_df.iloc[0]["oa"]
+                aa = alg_df.iloc[0]["aa"]
+                k = alg_df.iloc[0]["k"]
+                alg_df = pd.DataFrame(
+                    {'target_size': range(5, 31), 'oa': [oa] * 26, 'aa': [aa] * 26, 'k': [k] * 26})
+                linestyle = "--"
+                color = "#000000"
+                marker = None
+            else:
+                algorithm_counter = algorithm_counter + 1
+
+            axes[metric_index].plot(alg_df['target_size'], alg_df[metric],
+                                    label=algorithm_label,
+                                    # marker=marker,
+                                    color=color,
+                                    fillstyle='none', markersize=7, linewidth=2, linestyle=linestyle
+                                    )
+
+        axes[metric_index].set_xlabel('Target size', fontsize=18)
+        axes[metric_index].set_ylabel(labels[metric_index], fontsize=18)
+        axes[metric_index].set_ylim(min_lim, max_lim)
+        axes[metric_index].tick_params(axis='both', which='major', labelsize=14)
+
+        if metric_index == 0:
+            legend = axes[metric_index].legend(title="Algorithms", loc='upper left', fontsize=18, ncols=1,
+                                               bbox_to_anchor=(0, 1.5),
+                                               columnspacing=10.0, frameon=True
+                                               )
+        legend.get_title().set_fontsize('18')
+        legend.get_title().set_fontweight('bold')
+
+        axes[metric_index].grid(True, linestyle='-', alpha=0.6)
+
+    #fig.text(0.5, 0.05, f"{dataset_label}", fontsize=22, ha='center')
+    fig.subplots_adjust(wspace=0.4, top=0.7, bottom=0.2)
+
+    # plt.tight_layout()
+    # fig.subplots_adjust(wspace=0.4)
+    plt.savefig(dest)
+    plt.close(fig)
 
 def plot_saved(exclude=None):
     files = []
@@ -161,24 +255,9 @@ def plot_baseline(source):
     )
 
 def plot_ablation(source):
-    plot_oak(source,
-         include=["v0","v1"],
-         out_file = "ablation_1.png"
-    )
-
-    plot_oak(source,
-         include=["v0","v1","v2"],
-         out_file = "ablation_2.png"
-    )
-
-    plot_oak(source,
-         include=["v2","v3"],
-         out_file = "ablation_3.png"
-    )
-
-    plot_oak(source,
-         include=["v3","v4"],
-         out_file = "ablation_3.png"
+    plot_ablation_oak(source,
+         include=["v0","v2","v35","v4"],
+         out_file = "ablation.png"
     )
 
 
@@ -189,8 +268,8 @@ def get_summaries(d):
 
 
 if __name__ == "__main__":
-    plot_baseline(get_summaries("stored"))
-
-    #plot_ablation(["saved_results/all_summary.csv"])
+    #plot_baseline(get_summaries("stored"))
+    #plot_ablation(get_summaries("stored")+["results/v35_summary.csv"])
+    plot_ablation_oak(["results/v35_summary.csv"])
 
 

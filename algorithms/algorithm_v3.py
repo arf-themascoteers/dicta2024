@@ -167,11 +167,10 @@ class Algorithm_v3(Algorithm):
         return mean_weights, band_indx, band_indx[: self.target_size]
 
     def l1_loss(self, channel_weights):
-        channel_weights = torch.abs(channel_weights)
-        return torch.mean(channel_weights)
+        return torch.norm(channel_weights, 1)
 
     def get_lambda(self, epoch):
-        return 0.01 * math.exp(-epoch/self.total_epoch)
+        return 0.0001 * math.exp(-epoch/self.total_epoch)
 
 
 
