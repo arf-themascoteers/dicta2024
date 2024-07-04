@@ -8,6 +8,7 @@ for f in os.listdir("data"):
     df = pd.read_csv(p)
     unique_values_count = df.iloc[:, -1].value_counts()
     print(f)
+    print(len(unique_values_count))
     print(len(df))
     print(len(df.columns)-1)
     print(unique_values_count)
