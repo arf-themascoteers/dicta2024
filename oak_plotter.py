@@ -133,8 +133,8 @@ def plot_oak(source, exclude=None, include=None, out_file="baseline.png"):
 
             axes[metric_index].grid(True, linestyle='-', alpha=0.6)
 
-        fig.text(0.5, 0, f"{dataset_label}", fontsize=22, ha='center')
-        fig.subplots_adjust(wspace=0.3, top=0.7, bottom=0.18)
+        fig.text(0.5, 0.05, f"{dataset_label}", fontsize=22, ha='center')
+        fig.subplots_adjust(wspace=0.2, top=0.7, bottom=0.2)
 
         #plt.tight_layout()
         #fig.subplots_adjust(wspace=0.4)
