@@ -15,7 +15,7 @@ ALGS = {
     #"v3": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed (proposed)",
     #"v3": "Proposed algorithm",
     #"v4": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed + adjusted L1",
-    "v4": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed + adjusted L1 (proposed)",
+    #"v4": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed + adjusted L1 (proposed)",
     "v5": "Proposed Algorithm",
 }
 
@@ -39,6 +39,12 @@ COLORS = {
     "v7": "#8B8589",
     "v5": "#d62728",
     "v6": "#ff7f0e",
+    "v41": "#008000",
+    "v42": "#8B8589",
+    "v43": "#9467bd",
+    "v44": "#ff7f0e",
+    "v45": "#FF00FF",
+    "v46": "#1f77b4",
 }
 
 
@@ -165,6 +171,8 @@ def plot_ablation_oak(source, exclude=None, include=None, out_file="ab.png"):
 
 
         df = df[df["dataset"] == d]
+        if len(df) == 0:
+            continue
         df.to_csv(os.path.join("saved_figs", "source.split.csv"), index=False)
         colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22",
                   "#17becf"]
@@ -184,7 +192,10 @@ def plot_ablation_oak(source, exclude=None, include=None, out_file="ab.png"):
             include = algorithms
 
         include = [x for x in include if x not in exclude]
-        df = df[df["algorithm"].isin(include)]
+        if len(include) == 0:
+            include = df["algorithm"].unique()
+        else:
+            df = df[df["algorithm"].isin(include)]
         min_lim = min(df["oa"].min(), df["aa"].min(), df["k"].min()) - 0.02
         max_lim = max(df["oa"].max(), df["aa"].max(), df["k"].max()) + 0.02
         print(min_lim, max_lim)
@@ -267,10 +278,12 @@ def plot_baseline(source,exclude=None):
          out_file = "baseline.png"
     )
 
-def plot_ablation(source):
+def plot_ablation(source, include = None):
+    if include is None:
+        include = []
     plot_ablation_oak(source,
          out_file = "ablation.png",
-         include=["bsnet","v0","v4","v5"]
+         include=include
     )
 
 
@@ -291,13 +304,9 @@ def get_summaries_rec(d):
 
     return paths
 
+
 if __name__ == "__main__":
-    # plot_ablation(
-    #     [
-    #         "saved_results/v4/v4_summary.csv",
-    #         "saved_results/v5/v5_summary.csv",
-    #      ]
-    # )
-    plot_baseline(
-        get_summaries_rec("saved_results")
+    plot_ablation(
+        get_summaries_rec("results"),
+        include=["v4","v46","v43"]
     )
