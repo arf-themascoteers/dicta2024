@@ -5,7 +5,8 @@ import os
 
 ALGS = {
     "v0": "BS-Net-Classifier [6]",
-    "v4": "BS-Net-Classifier [6] + Mean Weights + Full Batch + FC + Removed Sigmoid(Proposed)",
+    #"v4": "BS-Net-Classifier [6] + Mean Weights + Full Batch + FC + Removed Sigmoid(Proposed)",
+    "v4": "Proposed Algorithm",
     "all": "All Bands",
     "mcuve": "MCUVE [10]",
     "bsnet": "BS-Net-FC [5]",
@@ -67,9 +68,10 @@ def plot_oak(source, exclude=None, include=None, out_file="baseline.png"):
         df = sanitize_df(pd.read_csv(source))
     else:
         df = [sanitize_df(pd.read_csv(loc)) for loc in source]
+        df = [d for d in df if len(d)!=0]
         df = pd.concat(df, axis=0, ignore_index=True)
 
-    df.to_csv(os.path.join("saved_figs","source.split.csv"), index=False)
+    df.to_csv(os.path.join("saved_figs","baseline.split.csv"), index=False)
     colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
     markers = ['s', 'P', 'D', '^', 'o', '*', '.']
     labels = ["Overall Accuracy (OA)", "Average Accuracy (AA)", r"Cohen's kappa ($\kappa$)"]
@@ -166,7 +168,9 @@ def plot_ablation_oak(source, exclude=None, include=None, out_file="ab.png"):
         df = sanitize_df(pd.read_csv(source))
     else:
         df = [sanitize_df(pd.read_csv(loc)) for loc in source]
+        df = [d for d in df if len(d)!=0]
         df = pd.concat(df, axis=0, ignore_index=True)
+
 
     df = df[df["dataset"] == "indian_pines"]
     df.to_csv(os.path.join("saved_figs", "source.split.csv"), index=False)
@@ -280,25 +284,18 @@ def get_summaries(d):
     paths = [os.path.join(d, f) for f in files if f.endswith("_summary.csv")]
     return paths
 
+def get_summaries_rec(d):
+    files = os.listdir(d)
+    paths = [os.path.join(d, f) for f in files if f.endswith("_summary.csv")]
+    paths = [p for p in paths if not os.path.isdir(p)]
+
+    children = [os.path.join(d, f) for f in files if os.path.isdir(os.path.join(d, f))]
+    for child in children:
+        cpaths = get_summaries(child)
+        paths = paths + cpaths
+
+    return paths
 
 if __name__ == "__main__":
-    #plot_baseline(get_summaries("stored"))
+    plot_baseline(get_summaries_rec("saved_results"))
     #plot_ablation(get_summaries("stored")+["results/v35_summary.csv"])
-    plot_ablation_oak([
-        # "results/bsnet_summary.csv",
-        # "results/v0_summary.csv",
-        "results/v1_summary.csv",
-        # "results/v11_summary.csv",
-        #"results/v12_summary.csv",
-        # "results/v13_summary.csv"
-        #"results/v15_summary.csv"
-        #"results/v2_summary.csv",
-        "results/v2_summary.csv",
-        # "results/v21_summary.csv",
-        # "results/v22_summary.csv",
-        # "results/v31_summary.csv",
-    ])
-
-#v0, v1, v2, v21
-
-#    "v12": "BS-Net-Classifier [6] + FC + Full Batch",
