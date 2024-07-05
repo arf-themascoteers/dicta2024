@@ -44,7 +44,7 @@ COLORS = {
     "v43": "#9467bd",
     "v44": "#ff7f0e",
     "v45": "#FF00FF",
-    "v46": "#1f77b4",
+    "v47": "#1f77b4",
 }
 
 
@@ -308,5 +308,5 @@ def get_summaries_rec(d):
 if __name__ == "__main__":
     plot_ablation(
         get_summaries_rec("results"),
-        include=["v4","v46","v43"]
+        include=["v4","v47"]
     )
