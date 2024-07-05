@@ -16,6 +16,7 @@ ALGS = {
     #"v3": "Proposed algorithm",
     #"v4": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed + adjusted L1",
     "v4": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed + adjusted L1 (proposed)",
+    "v5": "Proposed Algorithm",
 }
 
 DSS = {
@@ -36,7 +37,7 @@ COLORS = {
     "v3": "#d62728",
     "v35": "#008000",
     "v7": "#8B8589",
-    "v5": "#9858b8",
+    "v5": "#d62728",
     "v6": "#ff7f0e",
 }
 
@@ -260,7 +261,7 @@ def plot_saved(exclude=None):
 def plot_baseline(source,exclude=None):
     if exclude is None:
         exclude = []
-    exclude = exclude + ["v1","v2","v3","v5","v6"]
+    exclude = exclude + ["v1","v2","v3","v4","v6"]
     plot_oak(source,
          exclude=exclude,
          out_file = "baseline.png"
@@ -269,7 +270,7 @@ def plot_baseline(source,exclude=None):
 def plot_ablation(source):
     plot_ablation_oak(source,
          out_file = "ablation.png",
-         include=["bsnet","v0","v2","v4"]
+         include=["bsnet","v0","v4","v5"]
     )
 
 
@@ -297,6 +298,6 @@ if __name__ == "__main__":
     #         "saved_results/v5/v5_summary.csv",
     #      ]
     # )
-    plot_ablation(
+    plot_baseline(
         get_summaries_rec("saved_results")
     )
