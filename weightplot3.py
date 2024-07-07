@@ -30,4 +30,4 @@ axes[1].set_title('Mean weight across the samples')
 axes[1].legend(loc='center left', bbox_to_anchor=(1, 0.5))
 axes[1].legend()
 
-plt.show()
+plt.savefig('stored_figs/weightplot.png')
