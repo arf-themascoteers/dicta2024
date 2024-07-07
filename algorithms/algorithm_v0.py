@@ -99,8 +99,6 @@ class Algorithm_v0(Algorithm):
                 loss = mse_loss + lambda_value*l1_loss
                 if self.verbose and batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,loss)
-                # if batch_idx == 0:
-                #     self.reporter.report_weight(epoch, channel_weights[:,128])
                 loss.backward()
                 optimizer.step()
 
