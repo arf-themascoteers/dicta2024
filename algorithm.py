@@ -71,9 +71,6 @@ class Algorithm(ABC):
     def set_selected_indices(self, selected_indices):
         self.selected_indices = selected_indices
 
-    def is_cacheable(self):
-        return True
-
     def get_cache_tag(self):
         return 0
 
