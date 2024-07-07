@@ -269,13 +269,16 @@ def plot_saved(exclude=None):
     plot_oak(files, exclude)
 
 
-def plot_baseline(source,exclude=None):
+def plot_baseline(source,exclude=None, include=None):
     if exclude is None:
         exclude = []
-    exclude = exclude + ["v1","v2","v3","v4","v6"]
+    if include is None:
+        include = []
+    exclude = exclude + ["v1","v2","v3","v6"]
     plot_oak(source,
          exclude=exclude,
-         out_file = "baseline.png"
+         out_file = "baseline.png",
+         include=include
     )
 
 def plot_ablation(source, include = None):
@@ -306,7 +309,11 @@ def get_summaries_rec(d):
 
 
 if __name__ == "__main__":
-    plot_ablation(
-        get_summaries_rec("results"),
+    plot_baseline(
+        [
+            "saved_results/47/47_summary.csv",
+            "saved_results/ps47/ps47_summary.csv",
+            "good/v4/v4_summary.csv"
+        ],
         include=["v4","v47"]
     )
