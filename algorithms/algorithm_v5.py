@@ -148,9 +148,6 @@ class Algorithm_v5(Algorithm):
     def get_lambda(self, epoch):
         return self.get_multiplier() * math.exp(-epoch / self.total_epoch)
 
-    def is_cacheable(self):
-        return False
-
     def get_multiplier(self):
         if self.dataset.get_name() == "indian_pines":
             if self.target_size <= 10:
