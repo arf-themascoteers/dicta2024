@@ -86,7 +86,7 @@ def plot_oak(source, exclude=None, include=None, out_file="baseline.png"):
     algorithms = df["algorithm"].unique()
     datasets = df["dataset"].unique()
 
-    if include is None:
+    if include is None or len(include) == 0:
         include = algorithms
 
     include = [x for x in include if x not in exclude]
@@ -275,7 +275,7 @@ def plot_baseline(source,exclude=None, include=None):
         exclude = []
     if include is None:
         include = []
-    exclude = exclude + ["v1","v2","v3","v6"]
+    exclude = exclude + ["v1","v2","v3"]
     plot_oak(source,
          exclude=exclude,
          out_file = "baseline.png",
@@ -311,9 +311,5 @@ def get_summaries_rec(d):
 
 if __name__ == "__main__":
     plot_baseline(
-        [
-            "good/4/4_summary.csv",
-            "results/5_summary.csv"
-        ],
-        include=["v4","v5"]
+        get_summaries_rec("good")
     )
