@@ -74,6 +74,9 @@ class Algorithm(ABC):
     def is_cacheable(self):
         return True
 
+    def get_cache_tag(self):
+        return 0
+
     @staticmethod
     def create(name, target_size, dataset, tag, reporter, verbose):
         class_name = f"Algorithm_{name}"
@@ -88,3 +91,4 @@ class Algorithm(ABC):
         if torch.is_tensor(self.weights) or isinstance(self.weights, np.ndarray):
             return self.weights.tolist()
         return self.weights
+

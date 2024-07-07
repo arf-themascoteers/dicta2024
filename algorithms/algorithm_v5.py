@@ -146,27 +146,29 @@ class Algorithm_v5(Algorithm):
         return torch.norm(channel_weights, p=1) / torch.numel(channel_weights)
 
     def get_lambda(self, epoch):
-        return self.get_multiplier(self.target_size) * math.exp(-epoch / self.total_epoch)
+        return self.get_multiplier() * math.exp(-epoch / self.total_epoch)
 
     def is_cacheable(self):
         return False
 
-    def get_multiplier(self, target_size):
+    def get_multiplier(self):
         if self.dataset.get_name() == "indian_pines":
-            if target_size <= 10:
+            if self.target_size <= 10:
                 return 1
             else:
                 return 0.01
         elif self.dataset.get_name() == "paviaU":
-            if target_size <= 20:
+            if self.target_size <= 20:
                 return 0.01
             else:
                 return 0.005
         else:
-            if target_size <= 5:
+            if self.target_size <= 5:
                 return 2
-            elif target_size >= 30:
+            elif self.target_size >= 30:
                 return 0.01
             else:
-                return 2 - (target_size - 5) * (2 - 0.01) / (30 - 5)
+                return 2 - (self.target_size - 5) * (2 - 0.01) / (30 - 5)
 
+    def get_cache_tag(self):
+        return self.get_multiplier()

@@ -18,7 +18,7 @@ class TaskRunner:
         self.remove_bg = remove_bg
         self.tag = tag
         self.reporter = Reporter(self.tag, self.skip_all_bands)
-        self.cache = pd.DataFrame(columns=["dataset","algorithm","oa","aa","k","time","selected_features","selected_weights"])
+        self.cache = pd.DataFrame(columns=["dataset","algorithm","cache_tag","oa","aa","k","time","selected_features","selected_weights"])
 
     def evaluate(self):
         for dataset_name in self.task["datasets"]:
@@ -39,12 +39,16 @@ class TaskRunner:
             oas, aas, ks, metric = self.get_results_for_a_case(algorithm)
             self.reporter.write_summary(algorithm, oas, aas, ks, metric)
         else:
-            print(algorithm.get_name(), "for", algorithm.dataset.get_name(), "for", algorithm.target_size,"was done. Skipping")
+            print(algorithm.get_name(), "for", algorithm.dataset.get_name(), "for",
+                  algorithm.target_size,"was done. Skipping")
 
     def get_results_for_a_case(self, algorithm:Algorithm):
         metric = self.get_from_cache(algorithm)
         if metric is not None:
-            print(f"Selected features got from cache for {algorithm.dataset.get_name()} for size {algorithm.target_size} for {algorithm.get_name()}")
+            print(f"Selected features got from cache for {algorithm.dataset.get_name()} "
+                  f"for size {algorithm.target_size} "
+                  f"for {algorithm.get_name()} "
+                  f"for cache_tag {algorithm.get_cache_tag()}")
             algorithm.set_selected_indices(metric.selected_features)
             algorithm.set_weights(metric.selected_weights)
             return algorithm.compute_performance()
@@ -59,6 +63,7 @@ class TaskRunner:
         self.cache.loc[len(self.cache)] = {
             "dataset":algorithm.dataset.get_name(),
             "algorithm": algorithm.get_name(),
+            "cache_tag": algorithm.get_cache_tag(),
             "time":metric.time,"oa":metric.oa,"aa":metric.aa,"k":metric.k,
             "selected_features":algorithm.get_all_indices(),
             "selected_weights":algorithm.get_weights()
@@ -71,7 +76,8 @@ class TaskRunner:
             return None
         rows = self.cache.loc[
             (self.cache["dataset"] == algorithm.dataset.get_name()) &
-            (self.cache["algorithm"] == algorithm.get_name())
+            (self.cache["algorithm"] == algorithm.get_name()) &
+            (self.cache["cache_tag"] == algorithm.get_cache_tag())
         ]
         if len(rows) == 0:
             return None
