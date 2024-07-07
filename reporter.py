@@ -12,10 +12,12 @@ class Reporter:
         self.skip_all_bands = skip_all_bands
         self.summary_filename = f"{tag}_summary.csv"
         self.details_filename = f"{tag}_details.csv"
+        self.weight_filename = f"{tag}_weights_6.csv"
         self.save_dir = f"saved_results/{tag}"
         self.summary_file = os.path.join("results", self.summary_filename)
         self.details_file = os.path.join("results", self.details_filename)
         self.current_epoch_report_file = None
+        self.current_weight_report_file = None
         os.makedirs("results", exist_ok=True)
 
         if not os.path.exists(self.summary_file):
@@ -141,6 +143,9 @@ class Reporter:
     def create_epoch_report(self, tag, algorithm, dataset, target_size):
         self.current_epoch_report_file = os.path.join("results", f"{tag}_{algorithm}_{dataset}_{target_size}.csv")
 
+    def create_weight_report(self, tag, algorithm, dataset, target_size):
+        self.current_weight_report_file = os.path.join("results", f"{tag}_{algorithm}_{dataset}_{target_size}_weights.csv")
+
     def report_epoch(self, epoch, mse_loss, l1_loss, lambda_value, loss,
                      oa,aa,k,
                      min_cw, max_cw, avg_cw,
@@ -174,4 +179,16 @@ class Reporter:
                        f"{Reporter.sanitize_weight(min_s)},{Reporter.sanitize_weight(max_s)},{Reporter.sanitize_weight(avg_s)},"
                        f"{int(l0_cw)},{int(l0_s)},"
                        f"{selected_bands_str},{selected_weights_str},{weights}\n")
+
+    def report_weight(self, epoch, weights):
+        if not os.path.exists(self.current_weight_report_file):
+            with open(self.current_weight_report_file, 'w') as file:
+                weight_labels = list(range(len(weights)))
+                weight_labels = [f"weight_{i}" for i in weight_labels]
+                weight_labels = ",".join(weight_labels)
+                file.write(f"epoch,{weight_labels}\n")
+        with open(self.current_weight_report_file, 'a') as file:
+            weights = [str(Reporter.sanitize_weight(i.item())) for i in weights]
+            weights = ",".join(weights)
+            file.write(f"{epoch},{weights}\n")
 

@@ -97,8 +97,9 @@ class Algorithm_v0(Algorithm):
                 l1_loss = self.l1_loss(channel_weights)
                 lambda_value = self.get_lambda(epoch+1)
                 loss = mse_loss + lambda_value*l1_loss
-                if batch_idx == 0 and self.epoch%10 == 0:
+                if self.verbose and batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,loss)
+                self.reporter.report_weight(epoch, channel_weights[:6])
                 loss.backward()
                 optimizer.step()
 
@@ -133,7 +134,7 @@ class Algorithm_v0(Algorithm):
                                    min_cw, max_cw, avg_cw,
                                    min_s, max_s, avg_s,
                                    l0_cw, l0_s,
-                                   selected_bands, means_sparse)
+                                   selected_bands, means_sparse)            
 
     def get_indices(self, deciding_weights):
         mean_weights = deciding_weights

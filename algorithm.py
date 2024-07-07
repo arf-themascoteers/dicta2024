@@ -19,6 +19,7 @@ class Algorithm(ABC):
         self.model = None
         self.all_indices = None
         self.reporter.create_epoch_report(tag, self.get_name(), self.dataset.get_name(), self.target_size)
+        self.reporter.create_weight_report(tag, self.get_name(), self.dataset.get_name(), self.target_size)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def fit(self):
