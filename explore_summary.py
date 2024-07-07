@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-df = pd.read_csv("good/v0i/v0i_summary.csv")
+df = pd.read_csv("temp/0_summary.csv")
 df = df[(df["dataset"]=="indian_pines")&(df["algorithm"]=="v0")&(df["target_size"]==30)]
 sfs = df.iloc[0]["selected_features"]
 weights = df.iloc[0]["selected_weights"]
