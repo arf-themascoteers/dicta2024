@@ -27,6 +27,7 @@ class TaskRunner:
                 self.evaluate_for_all_features(dataset)
             for algorithm in self.task["algorithms"]:
                 for target_size in self.task["target_sizes"]:
+                    print(dataset_name, algorithm, target_size)
                     algorithm_object = Algorithm.create(algorithm, target_size, dataset, self.tag, self.reporter, self.verbose)
                     self.process_a_case(algorithm_object)
 
@@ -52,7 +53,10 @@ class TaskRunner:
             algorithm.set_selected_indices(metric.selected_features)
             algorithm.set_weights(metric.selected_weights)
             return algorithm.compute_performance()
-        print(f"Computing {algorithm.get_name()} {algorithm.dataset.get_name()}")
+        print(f"NOT FOUND in cache for {algorithm.dataset.get_name()} "
+              f"for size {algorithm.target_size} "
+              f"for {algorithm.get_name()} "
+              f"for cache_tag {algorithm.get_cache_tag()}. Computing.")
         oas, aas, ks, metric = algorithm.compute_performance()
         self.save_to_cache(algorithm, metric)
         return oas, aas, ks, metric
