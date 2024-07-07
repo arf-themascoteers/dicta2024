@@ -147,7 +147,7 @@ class Algorithm_v2_weight(Algorithm):
         return torch.norm(channel_weights, p=1) / torch.numel(channel_weights)
 
     def get_lambda(self, epoch):
-        return 0.5 * math.exp(-epoch/self.total_epoch)
+        return 0.1 * math.exp(-epoch/self.total_epoch)
 
 
 
