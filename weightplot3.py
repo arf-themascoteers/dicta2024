@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 paths = {
-    'newest/dummyv0/dummyv0_v0_indian_pines_5_weights.csv' : "BS-Net-Classifier [6]",
-    'newest/dummyv2/dummyv2_v2_indian_pines_5_weights.csv' : "BS-Net-Classifier [6] with early aggregation of weights"
+    'weight/weights_v0_weight_indian_pines_30_weights.csv' : "v0",
+    'weight/weights_v2_weight_indian_pines_30_weights.csv' : "v2"
 }
 
 fig, axes = plt.subplots(1, 2, figsize=(15, 6))
