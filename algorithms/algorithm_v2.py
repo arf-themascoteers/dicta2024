@@ -4,7 +4,6 @@ import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 import math
-
 import train_test_evaluator
 
 
@@ -45,12 +44,12 @@ class ZhangNet(nn.Module):
         print("Number of learnable parameters:", num_params)
 
     def forward(self, X):
-        original_channel_weights = self.weighter(X)
-        channel_weights = torch.mean(original_channel_weights, dim=0)
+        channel_weights = self.weighter(X)
+        channel_weights = torch.mean(channel_weights, dim=0)
         sparse_weights = self.sparse(channel_weights)
         reweight_out = X * sparse_weights
         output = self.classnet(reweight_out)
-        return original_channel_weights, channel_weights, sparse_weights, output
+        return channel_weights, sparse_weights, output
 
 
 class Algorithm_v2(Algorithm):
@@ -80,7 +79,7 @@ class Algorithm_v2(Algorithm):
             self.epoch = epoch
             for batch_idx, (X, y) in enumerate(dataloader):
                 optimizer.zero_grad()
-                original_channel_weights, channel_weights, sparse_weights, y_hat = self.zhangnet(X)
+                channel_weights, sparse_weights, y_hat = self.zhangnet(X)
                 deciding_weights = channel_weights
                 mean_weight, all_bands, selected_bands = self.get_indices(deciding_weights)
                 self.set_all_indices(all_bands)
@@ -94,8 +93,6 @@ class Algorithm_v2(Algorithm):
                 loss = mse_loss + lambda_value*l1_loss
                 if self.verbose and batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,loss)
-                if batch_idx == 0:
-                    self.reporter.report_weight(epoch, original_channel_weights[0:128,8])
                 loss.backward()
                 optimizer.step()
 
@@ -148,7 +145,7 @@ class Algorithm_v2(Algorithm):
         return torch.norm(channel_weights, p=1) / torch.numel(channel_weights)
 
     def get_lambda(self, epoch):
-        return 0.0001 * math.exp(-epoch/self.total_epoch)
+        return 0.5 * math.exp(-epoch/self.total_epoch)
 
 
 
