@@ -12,12 +12,12 @@ ALGS = {
     "pcal": "PCA-loading [11]",
     "v1": "BS-Net-Classifier [6] + FC",
     "v2": "BS-Net-Classifier [6] + FC + early aggregation + full batch",
-    #"v3": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed (proposed)",
+    "v3": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed",
     #"v3": "Proposed algorithm",
     #"v4": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed + adjusted L1",
     #"v4": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed + adjusted L1 (proposed)",
     #"v4": "Current",
-    #"v5": "Proposed Algorithm",
+    "v4": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed + Adjusted L-1 (proposed)",
 }
 
 DSS = {
@@ -35,17 +35,8 @@ COLORS = {
     "pcal": "#9467bd",
     "v1": "#7FFF00",
     "v2": "#FF00FF",
-    "v3": "#d62728",
-    "v35": "#008000",
-    "v7": "#8B8589",
-    "v5": "#9467bd",
-    "v6": "#ff7f0e",
-    "v41": "#008000",
-    "v42": "#8B8589",
-    "v43": "#9467bd",
-    "v44": "#ff7f0e",
-    "v45": "#FF00FF",
-    "v47": "#1f77b4",
+    "v3": "#ff7f0e",
+
 }
 
 
@@ -243,7 +234,7 @@ def plot_ablation_oak(source, exclude=None, include=None, out_file="ab.png"):
 
             if metric_index == 0:
                 legend = axes[metric_index].legend(title="Algorithms", loc='upper left', fontsize=18, ncols=1,
-                                                   bbox_to_anchor=(0, 1.5),
+                                                   bbox_to_anchor=(0, 1.6),
                                                    columnspacing=10.0, frameon=True
                                                    )
             legend.get_title().set_fontsize('18')
@@ -310,6 +301,7 @@ def get_summaries_rec(d):
 
 
 if __name__ == "__main__":
-    plot_baseline(
-        get_summaries_rec("good")
+    plot_ablation(
+        get_summaries_rec("good"),
+        include=["v0","v2","v3","v4"]
     )
