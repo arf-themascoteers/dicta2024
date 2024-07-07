@@ -4,20 +4,20 @@ import matplotlib.pyplot as plt
 import os
 
 ALGS = {
-    "v0": "BS-Net-Classifier [6]",
+    # "v0": "BS-Net-Classifier [6]",
     #"v4": "Proposed Algorithm",
-    "all": "All Bands",
-    "mcuve": "MCUVE [10]",
-    "bsnet": "BS-Net-FC [5]",
-    "pcal": "PCA-loading [11]",
-    "v1": "BS-Net-Classifier [6] + FC",
-    "v2": "BS-Net-Classifier [6] + FC + early aggregation + full batch",
-    "v3": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed",
+    # "all": "All Bands",
+    # "mcuve": "MCUVE [10]",
+    # "bsnet": "BS-Net-FC [5]",
+    # "pcal": "PCA-loading [11]",
+    # "v1": "BS-Net-Classifier [6] + FC",
+    # "v2": "BS-Net-Classifier [6] + FC + early aggregation + full batch",
+    # "v3": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed",
     #"v3": "Proposed algorithm",
     #"v4": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed + adjusted L1",
     #"v4": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed + adjusted L1 (proposed)",
     #"v4": "Current",
-    "v4": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed + Adjusted L-1 (proposed)",
+    # "v4": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed + Adjusted L-1 (proposed)",
 }
 
 DSS = {
@@ -294,7 +294,7 @@ def get_summaries_rec(d):
 
     children = [os.path.join(d, f) for f in files if os.path.isdir(os.path.join(d, f))]
     for child in children:
-        cpaths = get_summaries(child)
+        cpaths = get_summaries_rec(child)
         paths = paths + cpaths
 
     return paths
@@ -303,11 +303,17 @@ def get_summaries_rec(d):
 if __name__ == "__main__":
     plot_ablation(
         [
-            "good/v0i/v0i_summary.csv",
-            "good/ip/ip_summary.csv",
-            "saved_results/1/1_summary.csv"
-        ]
-        #get_summaries_rec("good")
+            "good/ip_oth/ip_oth_summary.csv",
+            "good/salinas_oth/salinas_oth_summary.csv",
+            "good/pavia_oth/pavia_oth_summary.csv",
+            "newgen/0/0_summary.csv",
+            #"good/ip/ip_summary.csv",
+            "newgen/1/1i/1_summary.csv",
+            "newgen/1/1_summary.csv",
+            r"D:\src\dicta2024\saved_results\2_p1_candidate\2_summary.csv",
+            r"D:\src\dicta2024\saved_results\3_p2_candidate\3_2_summary.csv"
+        ]+get_summaries_rec("candidate")
         ,
-        include=["v0","v1","v11"]
+        #include=["bsnet","v0","v1","v2","v3"]
+        include=["bsnet","v0","v1","v2","v3"]
     )
