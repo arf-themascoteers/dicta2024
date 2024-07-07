@@ -94,7 +94,7 @@ class Algorithm_v2_weight(Algorithm):
                 if self.verbose and batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,loss)
                 if batch_idx == 0:
-                    self.reporter.report_weight(epoch, ocw[:, 78])
+                    self.reporter.report_weight(epoch, ocw[0:128, 78])
                 loss.backward()
                 optimizer.step()
 
