@@ -31,19 +31,13 @@ class ZhangNet(nn.Module):
             nn.Sigmoid()
         )
         self.classnet = nn.Sequential(
-            nn.Conv1d(1,16,kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm1d(16),
+            nn.Linear(self.bands, 300),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
-            nn.Conv1d(16, 8, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm1d(8),
+            nn.BatchNorm1d(300),
+            nn.Linear(300, 200),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
-            nn.Conv1d(8, 4, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm1d(4),
-            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
-            nn.Flatten(start_dim=1),
-            nn.Linear(last_layer_input,self.number_of_classes)
+            nn.BatchNorm1d(200),
+            nn.Linear(200, self.number_of_classes),
         )
         self.sparse = Sparse()
         num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
@@ -51,14 +45,14 @@ class ZhangNet(nn.Module):
 
     def forward(self, X):
         channel_weights = self.weighter(X)
+        channel_weights = torch.mean(channel_weights, dim=0)
         sparse_weights = self.sparse(channel_weights)
         reweight_out = X * sparse_weights
-        reweight_out = reweight_out.reshape(reweight_out.shape[0],1,reweight_out.shape[1])
         output = self.classnet(reweight_out)
         return channel_weights, sparse_weights, output
 
 
-class Algorithm_v0_weight_all(Algorithm):
+class Algorithm_v2_weight(Algorithm):
     def __init__(self, target_size:int, dataset, tag, reporter, verbose):
         super().__init__(target_size, dataset, tag, reporter, verbose)
         self.criterion = torch.nn.CrossEntropyLoss()
@@ -75,7 +69,7 @@ class Algorithm_v0_weight_all(Algorithm):
     def get_selected_indices(self):
         optimizer = torch.optim.Adam(self.zhangnet.parameters(), lr=0.001, betas=(0.9,0.999))
         dataset = TensorDataset(self.X_train, self.y_train)
-        dataloader = DataLoader(dataset, batch_size=128, shuffle=True)
+        dataloader = DataLoader(dataset, batch_size=12800000, shuffle=True)
         channel_weights = None
         loss = 0
         l1_loss = 0
@@ -83,7 +77,6 @@ class Algorithm_v0_weight_all(Algorithm):
 
         for epoch in range(self.total_epoch):
             self.epoch = epoch
-            saved_weights = []
             for batch_idx, (X, y) in enumerate(dataloader):
                 optimizer.zero_grad()
                 channel_weights, sparse_weights, y_hat = self.zhangnet(X)
@@ -100,13 +93,10 @@ class Algorithm_v0_weight_all(Algorithm):
                 loss = mse_loss + lambda_value*l1_loss
                 if self.verbose and batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,loss)
-                if epoch == self.total_epoch-1:
-                    saved_weights.append(channel_weights[:,85])
+                if batch_idx == 0:
+                    self.reporter.report_weight(epoch, channel_weights[:, 78])
                 loss.backward()
                 optimizer.step()
-
-            if epoch == self.total_epoch-1:
-                self.reporter.report_weight_all(saved_weights)
 
         print(self.get_name(),"selected bands and weights:")
         print("".join([str(i).ljust(10) for i in self.selected_indices]))
@@ -157,7 +147,7 @@ class Algorithm_v0_weight_all(Algorithm):
         return torch.norm(channel_weights, p=1) / torch.numel(channel_weights)
 
     def get_lambda(self, epoch):
-        return 0.0001 * math.exp(-epoch/self.total_epoch)
+        return 0.5 * math.exp(-epoch/self.total_epoch)
 
 
 
