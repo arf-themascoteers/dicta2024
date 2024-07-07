@@ -310,8 +310,6 @@ if __name__ == "__main__":
             #"good/ip/ip_summary.csv",
             "newgen/1/1i/1_summary.csv",
             "newgen/1/1_summary.csv",
-            r"D:\src\dicta2024\saved_results\2_p1_candidate\2_summary.csv",
-            r"D:\src\dicta2024\saved_results\3_p2_candidate\3_2_summary.csv"
         ]+get_summaries_rec("candidate")
         ,
         #include=["bsnet","v0","v1","v2","v3"]
