@@ -135,7 +135,7 @@ class Algorithm_v0(Algorithm):
                                    min_cw, max_cw, avg_cw,
                                    min_s, max_s, avg_s,
                                    l0_cw, l0_s,
-                                   selected_bands, means_sparse)            
+                                   selected_bands, means_sparse)
 
     def get_indices(self, deciding_weights):
         mean_weights = deciding_weights

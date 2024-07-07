@@ -302,6 +302,12 @@ def get_summaries_rec(d):
 
 if __name__ == "__main__":
     plot_ablation(
-        get_summaries_rec("good"),
-        include=["v0","v2","v3","v4"]
+        [
+            "good/v0i/v0i_summary.csv",
+            "good/ip/ip_summary.csv",
+            "saved_results/1/1_summary.csv"
+        ]
+        #get_summaries_rec("good")
+        ,
+        include=["v0","v1","v11"]
     )
