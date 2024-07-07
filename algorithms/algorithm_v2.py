@@ -45,12 +45,12 @@ class ZhangNet(nn.Module):
         print("Number of learnable parameters:", num_params)
 
     def forward(self, X):
-        channel_weights = self.weighter(X)
-        channel_weights = torch.mean(channel_weights, dim=0)
+        original_channel_weights = self.weighter(X)
+        channel_weights = torch.mean(original_channel_weights, dim=0)
         sparse_weights = self.sparse(channel_weights)
         reweight_out = X * sparse_weights
         output = self.classnet(reweight_out)
-        return channel_weights, sparse_weights, output
+        return original_channel_weights, channel_weights, sparse_weights, output
 
 
 class Algorithm_v2(Algorithm):
@@ -80,7 +80,7 @@ class Algorithm_v2(Algorithm):
             self.epoch = epoch
             for batch_idx, (X, y) in enumerate(dataloader):
                 optimizer.zero_grad()
-                channel_weights, sparse_weights, y_hat = self.zhangnet(X)
+                original_channel_weights, channel_weights, sparse_weights, y_hat = self.zhangnet(X)
                 deciding_weights = channel_weights
                 mean_weight, all_bands, selected_bands = self.get_indices(deciding_weights)
                 self.set_all_indices(all_bands)
@@ -95,7 +95,7 @@ class Algorithm_v2(Algorithm):
                 if self.verbose and batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,loss)
                 if batch_idx == 0:
-                    self.reporter.report_weight(epoch, channel_weights[:,6])
+                    self.reporter.report_weight(epoch, original_channel_weights[:,6])
                 loss.backward()
                 optimizer.step()
 
