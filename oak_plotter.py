@@ -16,7 +16,8 @@ ALGS = {
     #"v3": "Proposed algorithm",
     #"v4": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed + adjusted L1",
     #"v4": "BS-Net-Classifier [6] + FC + early aggregation + full batch + sigmoid removed + adjusted L1 (proposed)",
-    "v5": "Proposed Algorithm",
+    #"v4": "Current",
+    #"v5": "Proposed Algorithm",
 }
 
 DSS = {
@@ -37,7 +38,7 @@ COLORS = {
     "v3": "#d62728",
     "v35": "#008000",
     "v7": "#8B8589",
-    "v5": "#d62728",
+    "v5": "#9467bd",
     "v6": "#ff7f0e",
     "v41": "#008000",
     "v42": "#8B8589",
@@ -311,9 +312,8 @@ def get_summaries_rec(d):
 if __name__ == "__main__":
     plot_baseline(
         [
-            "saved_results/47/47_summary.csv",
-            "saved_results/ps47/ps47_summary.csv",
-            "good/v4/v4_summary.csv"
+            "good/4/4_summary.csv",
+            "results/5_summary.csv"
         ],
-        include=["v4","v47"]
+        include=["v4","v5"]
     )
