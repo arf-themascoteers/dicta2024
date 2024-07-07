@@ -18,6 +18,7 @@ class Reporter:
         self.details_file = os.path.join("results", self.details_filename)
         self.current_epoch_report_file = None
         self.current_weight_report_file = None
+        self.current_weight_all_report_file = None
         os.makedirs("results", exist_ok=True)
 
         if not os.path.exists(self.summary_file):
@@ -146,6 +147,9 @@ class Reporter:
     def create_weight_report(self, tag, algorithm, dataset, target_size):
         self.current_weight_report_file = os.path.join("results", f"{tag}_{algorithm}_{dataset}_{target_size}_weights.csv")
 
+    def create_weight_all_report(self, tag, algorithm, dataset, target_size):
+        self.current_weight_all_report_file = os.path.join("results", f"{tag}_{algorithm}_{dataset}_{target_size}_weights_all.csv")
+
     def report_epoch(self, epoch, mse_loss, l1_loss, lambda_value, loss,
                      oa,aa,k,
                      min_cw, max_cw, avg_cw,
@@ -191,4 +195,13 @@ class Reporter:
             weights = [str(Reporter.sanitize_weight(i.item())) for i in weights]
             weights = ",".join(weights)
             file.write(f"{epoch},{weights}\n")
+
+    def report_weight_all(self, saved_weights):
+        weights = [torch.mean(w) for w in saved_weights]
+        if not os.path.exists(self.current_weight_all_report_file):
+            with open(self.current_weight_report_file, 'w') as file:
+                file.write(f"epoch,mean_weight\n")
+        for i,weight in enumerate(weights):
+            with open(self.current_weight_all_report_file, 'a') as file:
+                file.write(f"{i},{weight}\n")
 
