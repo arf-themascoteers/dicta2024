@@ -302,7 +302,7 @@ def get_summaries_rec(d):
 
 if __name__ == "__main__":
     plot_ablation(
-        get_summaries_rec("current")
+        get_summaries_rec("current")+get_summaries_rec("results")
         ,
-        include=["bsnet","v0","v1","v2"]
+        include=["bsnet","v0","v1","v2","v3"]
     )
