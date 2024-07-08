@@ -161,11 +161,12 @@ class Reporter:
                 weight_labels = list(range(len(mean_weight)))
                 weight_labels = [f"weight_{i}" for i in weight_labels]
                 weight_labels = ",".join(weight_labels)
-                file.write(f"epoch,mse_loss,l1_loss,lambda_value,loss,"
+                file.write(f"epoch,"
+                           f"l0_cw,l0_s,"
+                           f"mse_loss,l1_loss,lambda_value,loss,"
                            f"oa,aa,k,"
                            f"min_cw,max_cw,avg_cw,"
                            f"min_s,max_s,avg_s,"
-                           f"l0_cw,l0_s,"
                            f"selected_bands,selected_weights,{weight_labels}\n")
         with open(self.current_epoch_report_file, 'a') as file:
             weights = [str(Reporter.sanitize_weight(i.item())) for i in mean_weight]
@@ -175,13 +176,14 @@ class Reporter:
             selected_weights = [str(Reporter.sanitize_weight(i.item())) for i in mean_weight[selected_bands]]
             selected_weights_str = '|'.join(selected_weights)
 
-            file.write(f"{epoch},{Reporter.sanitize_metric(mse_loss)},"
+            file.write(f"{epoch},"
+                       f"{int(l0_cw)},{int(l0_s)},"
+                       f"{Reporter.sanitize_metric(mse_loss)},"
                        f"{Reporter.sanitize_small(l1_loss)},{Reporter.sanitize_small(lambda_value)},"
                        f"{Reporter.sanitize_metric(loss)},"
                        f"{Reporter.sanitize_metric(oa)},{Reporter.sanitize_metric(aa)},{Reporter.sanitize_metric(k)},"
                        f"{Reporter.sanitize_weight(min_cw)},{Reporter.sanitize_weight(max_cw)},{Reporter.sanitize_weight(avg_cw)},"
                        f"{Reporter.sanitize_weight(min_s)},{Reporter.sanitize_weight(max_s)},{Reporter.sanitize_weight(avg_s)},"
-                       f"{int(l0_cw)},{int(l0_s)},"
                        f"{selected_bands_str},{selected_weights_str},{weights}\n")
 
     def report_weight(self, epoch, weights):
