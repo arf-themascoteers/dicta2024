@@ -6,15 +6,21 @@ import numpy as np
 import math
 import train_test_evaluator
 
-
 class Sparse(nn.Module):
     def __init__(self):
         super().__init__()
-        self.k = 0.1
 
-    def forward(self, X):
-        X = torch.where(torch.abs(X) < self.k, 0, X)
+    def forward(self, X, epoch):
+        X = torch.where(torch.abs(X) < self.get_k(epoch), 0, X)
         return X
+
+    def get_k(self, epoch):
+        if epoch < 50:
+            return 0.0
+        elif epoch > 500:
+            return 0.3
+        else:
+            return (epoch - 50) * (0.3 / (500 - 50))
 
 
 class ZhangNet(nn.Module):
@@ -26,7 +32,6 @@ class ZhangNet(nn.Module):
         self.last_layer_input = last_layer_input
         self.weighter = nn.Sequential(
             nn.Linear(self.bands, 512),
-            nn.BatchNorm1d(512),
             nn.ReLU(),
             nn.Linear(512, self.bands)
         )
@@ -43,10 +48,11 @@ class ZhangNet(nn.Module):
         num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
         print("Number of learnable parameters:", num_params)
 
-    def forward(self, X):
+    def forward(self, X, epoch):
         channel_weights = self.weighter(X)
+        channel_weights = torch.abs(channel_weights)
         channel_weights = torch.mean(channel_weights, dim=0)
-        sparse_weights = self.sparse(channel_weights)
+        sparse_weights = self.sparse(channel_weights, epoch)
         reweight_out = X * sparse_weights
         output = self.classnet(reweight_out)
         return channel_weights, sparse_weights, output
@@ -79,7 +85,7 @@ class Algorithm_v3(Algorithm):
             self.epoch = epoch
             for batch_idx, (X, y) in enumerate(dataloader):
                 optimizer.zero_grad()
-                channel_weights, sparse_weights, y_hat = self.zhangnet(X)
+                channel_weights, sparse_weights, y_hat = self.zhangnet(X, epoch)
                 deciding_weights = channel_weights
                 mean_weight, all_bands, selected_bands = self.get_indices(deciding_weights)
                 self.set_all_indices(all_bands)
@@ -145,7 +151,7 @@ class Algorithm_v3(Algorithm):
         return torch.norm(channel_weights, p=1) / torch.numel(channel_weights)
 
     def get_lambda(self, epoch):
-        return 0.3 * math.exp(-epoch/self.total_epoch)
+        return 0.05 * math.exp(-epoch/self.total_epoch)
 
 
 
