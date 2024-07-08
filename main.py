@@ -1,11 +1,11 @@
 from task_runner import TaskRunner
 
 if __name__ == '__main__':
-    tag = "3"
+    tag = "ip"
     tasks = {
-        "algorithms" : ["v3"],
-        "datasets": ["indian_pines","paviaU","salinas"],
+        "algorithms" : ["bsnet","v0","v1","v2","v3"],
+        "datasets": ["indian_pines"],
         "target_sizes" : list(range(30,4,-1))
     }
-    ev = TaskRunner(tasks,tag,skip_all_bands=True, verbose=True)
+    ev = TaskRunner(tasks,tag,skip_all_bands=True, verbose=False)
     summary, details = ev.evaluate()
