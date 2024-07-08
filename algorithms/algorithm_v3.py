@@ -27,7 +27,7 @@ class Sparse(nn.Module):
 class ZhangNet(nn.Module):
     def __init__(self, bands, number_of_classes, last_layer_input):
         super().__init__()
-        
+
         self.bands = bands
         self.number_of_classes = number_of_classes
         self.last_layer_input = last_layer_input
@@ -155,7 +155,7 @@ class Algorithm_v3(Algorithm):
         return torch.norm(channel_weights, p=1) / torch.numel(channel_weights)
 
     def get_lambda(self, epoch):
-        return 0.05 * math.exp(-epoch/self.total_epoch)
+        return 0.05 * math.exp(-epoch / self.total_epoch)
 
 
 
