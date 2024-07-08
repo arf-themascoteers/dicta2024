@@ -302,8 +302,10 @@ def get_summaries_rec(d):
 
 if __name__ == "__main__":
     plot_ablation(
-        get_summaries_rec("current")+get_summaries_rec("results")
+        get_summaries_rec("current")+get_summaries_rec("results")+
+        [
+            r"E:\src\dicta3\results\3_summary.csv"
+         ]
         ,
-        #include=["bsnet","v0","v1","v2","v3","v4","v5"]
-        include=["bsnet","v0","v1","v2","v3"]
+        include=["bsnet","v0","v1","v2","v3","v4"]
     )
