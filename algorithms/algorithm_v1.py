@@ -90,7 +90,7 @@ class Algorithm_v1(Algorithm):
                 l1_loss = self.l1_loss(channel_weights)
                 lambda_value = self.get_lambda(epoch+1)
                 loss = mse_loss + lambda_value*l1_loss
-                if self.verbose and batch_idx == 0 and self.epoch%10 == 0:
+                if batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,loss)
                 loss.backward()
                 optimizer.step()
@@ -119,14 +119,17 @@ class Algorithm_v1(Algorithm):
 
         mean_weight, all_bands, selected_bands = self.get_indices(channel_weights)
 
-        oa, aa, k = train_test_evaluator.evaluate_split(*self.dataset.get_a_fold(), self)
+        oa, aa, k = 0,0,0
+
         if self.verbose:
-            self.reporter.report_epoch(epoch, mse_loss, l1_loss, lambda1,loss,
-                                   oa, aa, k,
-                                   min_cw, max_cw, avg_cw,
-                                   min_s, max_s, avg_s,
-                                   l0_cw, l0_s,
-                                   selected_bands, means_sparse)
+            oa, aa, k = train_test_evaluator.evaluate_split(*self.dataset.get_a_fold(), self)
+
+        self.reporter.report_epoch(epoch, mse_loss, l1_loss, lambda1,loss,
+                               oa, aa, k,
+                               min_cw, max_cw, avg_cw,
+                               min_s, max_s, avg_s,
+                               l0_cw, l0_s,
+                               selected_bands, means_sparse)
 
     def get_indices(self, deciding_weights):
         mean_weights = deciding_weights

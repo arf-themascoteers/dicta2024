@@ -84,7 +84,7 @@ class Algorithm_bsnet(Algorithm):
                 mse_loss = self.criterion(y_hat, y)
                 l1_loss = torch.norm(channel_weights, p=1)/torch.numel(channel_weights)
                 loss = mse_loss + l1_loss * 0.01
-                if self.verbose and batch_idx == 0 and self.epoch%10 == 0:
+                if batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, channel_weights, epoch, mse_loss, l1_loss.item(), 0.01,loss)
                 loss.backward()
                 optimizer.step()
@@ -114,7 +114,9 @@ class Algorithm_bsnet(Algorithm):
 
         mean_weight, all_bands, selected_bands = self.get_indices(channel_weights)
 
-        oa, aa, k = train_test_evaluator.evaluate_split(*self.dataset.get_a_fold(), self)
+        oa, aa, k = 0,0,0
+        if self.verbose:
+            oa, aa, k = train_test_evaluator.evaluate_split(*self.dataset.get_a_fold(), self)
         self.reporter.report_epoch(epoch, mse_loss, l1_loss, lambda1, loss,
                                    oa, aa, k,
                                    min_cw, max_cw, avg_cw,
