@@ -304,14 +304,19 @@ if __name__ == "__main__":
     plot_ablation(
         [
             "good/ip_oth/ip_oth_summary.csv",
-            "good/salinas_oth/salinas_oth_summary.csv",
             "good/pavia_oth/pavia_oth_summary.csv",
+            "good/salinas_oth/salinas_oth_summary.csv",
+            # "good/salinas_oth/salinas_oth_summary.csv",
+            # "good/pavia_oth/pavia_oth_summary.csv",
             "newgen/0/0_summary.csv",
             #"good/ip/ip_summary.csv",
-            "newgen/1/1i/1_summary.csv",
-            "newgen/1/1_summary.csv",
-        ]+get_summaries_rec("candidate")
+            "results/1_summary.csv",
+            "results/1ps_summary.csv",
+            r"E:\src\dicta2\results\2_summary.csv"
+            # "newgen/1/1_summary.csv",
+
+        ]
         ,
         #include=["bsnet","v0","v1","v2","v3"]
-        include=["bsnet","v0","v1","v2","v3"]
+        include=["bsnet","v0","v1","v2"]
     )
