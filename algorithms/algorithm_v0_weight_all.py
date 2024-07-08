@@ -101,11 +101,12 @@ class Algorithm_v0_weight_all(Algorithm):
                 if batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,loss)
                 if epoch == self.total_epoch-1:
-                    saved_weights.append(channel_weights[:,152])
+                    saved_weights.append(channel_weights[:,[152,195,11]])
                 loss.backward()
                 optimizer.step()
 
             if epoch == self.total_epoch-1:
+                saved_weights = torch.cat(saved_weights, dim=0)
                 self.reporter.report_weight_all(saved_weights)
 
         print(self.get_name(),"selected bands and weights:")

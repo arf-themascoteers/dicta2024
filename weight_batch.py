@@ -1,17 +1,19 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-path = "weight/weights_v0_weight_all_indian_pines_30_weights_all.csv"
-df = pd.read_csv(path)
+data = pd.read_csv('your_file.csv')
+batch = data.iloc[:, 0]
+mean_weight = data.iloc[:, 1]
+std_weight = data.iloc[:, 2]
 
-batch_numbers = df.iloc[:, 0]
-mean_weights = df.iloc[:, 1]
+fig, ax1 = plt.subplots()
 
-plt.figure(figsize=(10, 6))
-plt.bar(batch_numbers, mean_weights)
+ax1.plot(batch, mean_weight, 'b-')
+ax1.set_xlabel('Batch Number')
+ax1.set_ylabel('Mean Weight', color='b')
 
-plt.xlabel('Batch Number')
-plt.ylabel('Mean Weight')
-plt.title('Mean Weight for Each Batch')
+ax2 = ax1.twinx()
+ax2.plot(batch, std_weight, 'r-')
+ax2.set_ylabel('Standard Deviation of Weights', color='r')
 
 plt.show()
