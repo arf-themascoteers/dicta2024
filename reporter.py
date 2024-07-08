@@ -203,6 +203,6 @@ class Reporter:
             with open(self.current_weight_report_file, 'w') as file:
                 file.write(f"batch,w1,w2,w3\n")
             with open(self.current_weight_all_report_file, 'a') as file:
-                for i in [0,10,20]:
-                    file.write(f"{i},{saved_weights[i,0]},{saved_weights[i,1],saved_weights[i,2]}\n")
+                for i in range(0,500,10):
+                    file.write(f"{i},{saved_weights[i,0].item()},{saved_weights[i,1].item(),saved_weights[i,2].item()}\n")
 
