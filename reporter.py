@@ -199,12 +199,10 @@ class Reporter:
             file.write(f"{epoch},{weights}\n")
 
     def report_weight_all(self, saved_weights):
-        mean_weights = [torch.mean(w) for w in saved_weights]
-        std_weights = [torch.std(w) for w in saved_weights]
         if not os.path.exists(self.current_weight_all_report_file):
             with open(self.current_weight_report_file, 'w') as file:
-                file.write(f"batch,mean_weight,std_weight\n")
-        for i in range(len(saved_weights)):
+                file.write(f"batch,w1,w2,w3\n")
             with open(self.current_weight_all_report_file, 'a') as file:
-                file.write(f"{i},{mean_weights[i].item()},{std_weights[i].item()}\n")
+                for i in [0,10,20]:
+                    file.write(f"{i},{saved_weights[i,0]},{saved_weights[i,1],saved_weights[i,2]}\n")
 
