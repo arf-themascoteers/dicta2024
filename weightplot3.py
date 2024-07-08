@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 paths = {
     'weight/weights_v0_weight_indian_pines_30_weights.csv' : "v0",
@@ -30,4 +31,5 @@ axes[1].set_title('Mean weight across the samples')
 axes[1].legend(loc='center left', bbox_to_anchor=(1, 0.5))
 axes[1].legend()
 
+os.makedirs("stored_figs", exist_ok=True)
 plt.savefig('stored_figs/weightplot.png')
