@@ -162,6 +162,8 @@ class Algorithm_v3(Algorithm):
         m = 0.2
         if self.dataset.get_name() == "paviaU":
             m = 0.005
+        elif self.dataset.get_name() == "salinas":
+            m = 0.001
         return m * math.exp(-epoch / self.total_epoch)
 
 
