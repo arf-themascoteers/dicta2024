@@ -8,8 +8,9 @@ import train_test_evaluator
 
 
 class Sparse(nn.Module):
-    def __init__(self):
+    def __init__(self, dataset):
         super().__init__()
+        self.dataset = dataset
         self.last_k = 0
 
     def forward(self, X, epoch,l0_norm):
@@ -18,9 +19,15 @@ class Sparse(nn.Module):
         return X
 
     def get_k(self, epoch,l0_norm):
-        if l0_norm <= 50:
-            return self.last_k
+        l0_norm_threshold = 50
         start = 250
+
+        if self.dataset == "paviaU":
+            l0_norm_threshold = 40
+            start = 400
+
+        if l0_norm <= l0_norm_threshold:
+            return self.last_k
         end = 500
         minimum = 0
         maximum = 1
@@ -33,9 +40,9 @@ class Sparse(nn.Module):
 
 
 class ZhangNet(nn.Module):
-    def __init__(self, bands, number_of_classes, last_layer_input):
+    def __init__(self, bands, number_of_classes, last_layer_input, dataset):
         super().__init__()
-
+        self.dataset = dataset
         self.bands = bands
         self.number_of_classes = number_of_classes
         self.last_layer_input = last_layer_input
@@ -53,7 +60,7 @@ class ZhangNet(nn.Module):
             nn.BatchNorm1d(200),
             nn.Linear(200, self.number_of_classes),
         )
-        self.sparse = Sparse()
+        self.sparse = Sparse(self.dataset)
         num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
         print("Number of learnable parameters:", num_params)
 
@@ -75,7 +82,8 @@ class Algorithm_v3(Algorithm):
         self.last_layer_input = 100
         if self.dataset.name == "paviaU":
             self.last_layer_input = 48
-        self.zhangnet = ZhangNet(self.dataset.get_train_x().shape[1], self.class_size, self.last_layer_input).to(self.device)
+        self.zhangnet = ZhangNet(self.dataset.get_train_x().shape[1], self.class_size, self.last_layer_input,
+                                 self.dataset.get_name()).to(self.device)
         self.total_epoch = 500
         self.epoch = -1
         self.X_train = torch.tensor(self.dataset.get_train_x(), dtype=torch.float32).to(self.device)
@@ -168,13 +176,13 @@ class Algorithm_v3(Algorithm):
         return torch.norm(channel_weights, p=1) / torch.numel(channel_weights)
 
     def get_lambda(self, l0_norm):
-        if l0_norm <= 50:
+        if l0_norm <= 40:
             return 0
         m = 0.01
         if self.dataset.get_name() == "paviaU":
             m = 0.005
         elif self.dataset.get_name() == "salinas":
-            m = 0.001
+            m = 0.005
         return m
 
 
