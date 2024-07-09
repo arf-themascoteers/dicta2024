@@ -302,7 +302,7 @@ def get_summaries_rec(d):
 
 if __name__ == "__main__":
     plot_ablation(
-        get_summaries_rec("final") + ["archived_exps/v1_k3/v5_summary.csv"]
+        get_summaries_rec("8_7")
         ,
-        include=["bsnet","v0","v1","v5"]
+        include=["bsnet","v0","v1","v2","v3"]
     )

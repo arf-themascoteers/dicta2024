@@ -8,12 +8,13 @@ import numpy as np
 
 
 class Algorithm(ABC):
-    def __init__(self, target_size:int, dataset, tag, reporter, verbose):
+    def __init__(self, target_size:int, dataset, tag, reporter, verbose, test=False):
         self.target_size = target_size
         self.dataset = dataset
         self.tag = tag
         self.reporter = reporter
         self.verbose = verbose
+        self.test = test
         self.selected_indices = None
         self.weights = None
         self.model = None
@@ -80,11 +81,11 @@ class Algorithm(ABC):
         return 0
 
     @staticmethod
-    def create(name, target_size, dataset, tag, reporter, verbose):
+    def create(name, target_size, dataset, tag, reporter, verbose, test):
         class_name = f"Algorithm_{name}"
         module = importlib.import_module(f"algorithms.algorithm_{name}")
         clazz = getattr(module, class_name)
-        return clazz(target_size, dataset, tag, reporter, verbose)
+        return clazz(target_size, dataset, tag, reporter, verbose, test)
 
     def set_weights(self, mean_weight):
         self.weights = mean_weight

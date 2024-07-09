@@ -10,25 +10,26 @@ import numpy as np
 
 
 class TaskRunner:
-    def __init__(self, task, tag="results", skip_all_bands=False, verbose=False, remove_bg=False):
+    def __init__(self, task, tag="results", skip_all_bands=False, verbose=False, remove_bg=False, test=False):
         torch.manual_seed(3)
         self.task = task
         self.skip_all_bands = skip_all_bands
         self.verbose = verbose
         self.remove_bg = remove_bg
+        self.test = test
         self.tag = tag
         self.reporter = Reporter(self.tag, self.skip_all_bands)
         self.cache = pd.DataFrame(columns=["dataset","algorithm","cache_tag","oa","aa","k","time","selected_features","selected_weights"])
 
     def evaluate(self):
         for dataset_name in self.task["datasets"]:
-            dataset = DSManager(name=dataset_name, remove_bg=self.remove_bg)
+            dataset = DSManager(name=dataset_name, remove_bg=self.remove_bg, test=self.test)
             if not self.skip_all_bands:
                 self.evaluate_for_all_features(dataset)
             for algorithm in self.task["algorithms"]:
                 for target_size in self.task["target_sizes"]:
                     print(dataset_name, algorithm, target_size)
-                    algorithm_object = Algorithm.create(algorithm, target_size, dataset, self.tag, self.reporter, self.verbose)
+                    algorithm_object = Algorithm.create(algorithm, target_size, dataset, self.tag, self.reporter, self.verbose, self.test)
                     self.process_a_case(algorithm_object)
 
         self.reporter.save_results()

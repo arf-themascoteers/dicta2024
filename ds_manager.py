@@ -4,8 +4,9 @@ from sklearn.preprocessing import minmax_scale
 
 
 class DSManager:
-    def __init__(self, name, remove_bg=False):
+    def __init__(self, name, remove_bg=False, test=False):
         self.name = name
+        self.test=test
         dataset_path = f"data/{name}.csv"
         df = pd.read_csv(dataset_path)
         df.iloc[:, :-1] = minmax_scale(df.iloc[:, :-1])
@@ -16,7 +17,17 @@ class DSManager:
             self.foreground_data[:, -1] = self.foreground_data[:, -1] - 1
             self.data = self.foreground_data
         self.bs_train = self.data
-        print(f"{self.name}: After background processing, Total samples", len(self.data))
+
+        if self.test:
+            if self.get_name() != "indian_pines":
+                k = 0.9
+                if self.get_name() != "salinas":
+                    k = 0.95
+                self.bs_train, _ =  train_test_split(self.bs_train, test_size=k,seed=40, stratify=self.bs_train[:, -1])
+                self.foreground_data, _ =  train_test_split(self.foreground_data, test_size=k,seed=40, stratify=self.foreground_data[:, -1])
+
+        print(f"{self.name}: After background processing, Total bs train samples", len(self.bs_train))
+        print(f"{self.name}: After background processing, Total train-test samples", len(self.foreground_data))
 
     def get_name(self):
         return self.name
@@ -37,7 +48,10 @@ class DSManager:
         return self.foreground_data
 
     def get_k_folds(self):
-        for i in range(20):
+        folds = 20
+        if self.test:
+            folds = 1
+        for i in range(folds):
             seed = 40 + i
             yield self.get_a_fold(seed)
 
