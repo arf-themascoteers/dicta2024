@@ -18,10 +18,10 @@ class Sparse(nn.Module):
         return X
 
     def get_k(self, epoch,l0_norm):
-        if l0_norm <= 40:
+        if l0_norm <= 50:
             return self.last_k
-        start = 100
-        end = 400
+        start = 250
+        end = 500
         minimum = 0
         maximum = 1
         if epoch < start:
@@ -168,7 +168,7 @@ class Algorithm_v3(Algorithm):
         return torch.norm(channel_weights, p=1) / torch.numel(channel_weights)
 
     def get_lambda(self, l0_norm):
-        if l0_norm <= 40:
+        if l0_norm <= 50:
             return 0
         m = 0.01
         if self.dataset.get_name() == "paviaU":
