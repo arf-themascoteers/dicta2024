@@ -10,16 +10,20 @@ import train_test_evaluator
 class Sparse(nn.Module):
     def __init__(self):
         super().__init__()
+        self.last_k = 0
 
-    def forward(self, X, epoch):
-        X = torch.where(torch.abs(X) < self.get_k(epoch), 0, X)
+    def forward(self, X, epoch,l0_norm):
+        self.last_k = self.get_k(epoch,l0_norm)
+        X = torch.where(torch.abs(X) < self.last_k, 0, X)
         return X
 
-    def get_k(self, epoch):
-        start = 50
-        end = 500
+    def get_k(self, epoch,l0_norm):
+        if l0_norm <= 40:
+            return self.last_k
+        start = 100
+        end = 400
         minimum = 0
-        maximum = 0.2
+        maximum = 1
         if epoch < start:
             return minimum
         elif epoch > end:
@@ -53,11 +57,11 @@ class ZhangNet(nn.Module):
         num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
         print("Number of learnable parameters:", num_params)
 
-    def forward(self, X, epoch):
+    def forward(self, X, epoch, l0_norm):
         channel_weights = self.weighter(X)
         channel_weights = torch.abs(channel_weights)
         channel_weights = torch.mean(channel_weights, dim=0)
-        sparse_weights = self.sparse(channel_weights, epoch)
+        sparse_weights = self.sparse(channel_weights, epoch, l0_norm)
         reweight_out = X * sparse_weights
         output = self.classnet(reweight_out)
         return channel_weights, sparse_weights, output
@@ -85,12 +89,17 @@ class Algorithm_v3(Algorithm):
         loss = 0
         l1_loss = 0
         mse_loss = 0
-
+        l0_norm = self.X_train.shape[1]
+        sparse_weights = None
         for epoch in range(self.total_epoch):
             self.epoch = epoch
             for batch_idx, (X, y) in enumerate(dataloader):
                 optimizer.zero_grad()
-                channel_weights, sparse_weights, y_hat = self.zhangnet(X, epoch)
+                if sparse_weights is None:
+                    l0_norm = self.X_train.shape[1]
+                else:
+                    l0_norm = torch.norm(sparse_weights, p=0).item()
+                channel_weights, sparse_weights, y_hat = self.zhangnet(X, epoch,l0_norm)
                 deciding_weights = channel_weights
                 mean_weight, all_bands, selected_bands = self.get_indices(deciding_weights)
                 self.set_all_indices(all_bands)
@@ -100,7 +109,7 @@ class Algorithm_v3(Algorithm):
                 y = y.type(torch.LongTensor).to(self.device)
                 mse_loss = self.criterion(y_hat, y)
                 l1_loss = self.l1_loss(channel_weights)
-                lambda_value = self.get_lambda(epoch+1)
+                lambda_value = self.get_lambda(l0_norm)
                 loss = mse_loss + lambda_value*l1_loss
                 if batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,loss)
@@ -158,13 +167,15 @@ class Algorithm_v3(Algorithm):
     def l1_loss(self, channel_weights):
         return torch.norm(channel_weights, p=1) / torch.numel(channel_weights)
 
-    def get_lambda(self, epoch):
-        m = 0.2
+    def get_lambda(self, l0_norm):
+        if l0_norm <= 40:
+            return 0
+        m = 0.01
         if self.dataset.get_name() == "paviaU":
             m = 0.005
         elif self.dataset.get_name() == "salinas":
             m = 0.001
-        return m * math.exp(-epoch / self.total_epoch)
+        return m
 
 
 
