@@ -16,12 +16,16 @@ class Sparse(nn.Module):
         return X
 
     def get_k(self, epoch):
-        if epoch < 100:
-            return 0.0
-        elif epoch > 500:
-            return 0.3
+        start = 50
+        end = 500
+        minimum = 0
+        maximum = 0.3
+        if epoch < start:
+            return minimum
+        elif epoch > end:
+            return maximum
         else:
-            return (epoch - 50) * (0.3 / (500 - 50))
+            return (epoch - start) * (maximum / (end - start))
 
 
 class ZhangNet(nn.Module):
