@@ -20,11 +20,11 @@ class DSManager:
 
         if self.test:
             if self.get_name() != "indian_pines":
-                k = 0.9
+                k = 0.4
                 if self.get_name() != "salinas":
-                    k = 0.95
-                self.bs_train, _ =  train_test_split(self.bs_train, test_size=k,seed=40, stratify=self.bs_train[:, -1])
-                self.foreground_data, _ =  train_test_split(self.foreground_data, test_size=k,seed=40, stratify=self.foreground_data[:, -1])
+                    k = 0.9
+                self.bs_train, _ =  train_test_split(self.bs_train, test_size=k, random_state=40, stratify=self.bs_train[:, -1])
+                self.foreground_data, _ =  train_test_split(self.foreground_data, test_size=k,random_state=40, stratify=self.foreground_data[:, -1])
 
         print(f"{self.name}: After background processing, Total bs train samples", len(self.bs_train))
         print(f"{self.name}: After background processing, Total train-test samples", len(self.foreground_data))
