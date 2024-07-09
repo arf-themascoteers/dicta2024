@@ -21,20 +21,23 @@ class Sparse(nn.Module):
     def get_k(self, epoch,l0_norm):
         l0_norm_threshold = 50
         start = 250
+        maximum = 1
 
         if self.dataset == "paviaU":
-            l0_norm_threshold = 40
-            start = 400
+            l0_norm_threshold = 35
+            start = 250
+            maximum = 1
 
         if self.dataset == "salinas":
-            l0_norm_threshold = 45
-            start = 300
+            l0_norm_threshold = 35
+            start = 250
 
         if l0_norm <= l0_norm_threshold:
             return self.last_k
+
         end = 500
         minimum = 0
-        maximum = 1
+
         if epoch < start:
             return minimum
         elif epoch > end:
@@ -182,18 +185,17 @@ class Algorithm_v3(Algorithm):
     def get_lambda(self, l0_norm):
         l0_norm_threshold = 50
         if self.dataset == "paviaU":
-            l0_norm_threshold = 40
+            l0_norm_threshold = 35
         if self.dataset == "salinas":
-            l0_norm_threshold = 45
+            l0_norm_threshold = 35
         if l0_norm <= l0_norm_threshold:
             return 0
         m = 0.01
         if self.dataset.get_name() == "paviaU":
-            m = 0.005
+            m = 0.0001
         elif self.dataset.get_name() == "salinas":
             m = 0.05
         return m
-
 
 
 
