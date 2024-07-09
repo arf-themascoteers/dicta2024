@@ -19,7 +19,7 @@ class Sparse(nn.Module):
         start = 50
         end = 500
         minimum = 0
-        maximum = 0.3
+        maximum = 0.2
         if epoch < start:
             return minimum
         elif epoch > end:
@@ -161,7 +161,7 @@ class Algorithm_v3(Algorithm):
     def get_lambda(self, epoch):
         m = 0.2
         if self.dataset.get_name() == "paviaU":
-            m = 0.1
+            m = 0.005
         return m * math.exp(-epoch / self.total_epoch)
 
 
