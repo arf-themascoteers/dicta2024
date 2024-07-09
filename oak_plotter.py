@@ -304,5 +304,5 @@ if __name__ == "__main__":
     plot_ablation(
         get_summaries_rec("8_7")
         ,
-        include=["pcal","mcuve","bsnet","v0","v3"]
+        include=["pcal","mcuve","bsnet","v0","v1","v2","v3"]
     )
