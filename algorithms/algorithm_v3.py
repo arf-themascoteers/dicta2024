@@ -176,7 +176,10 @@ class Algorithm_v3(Algorithm):
         return torch.norm(channel_weights, p=1) / torch.numel(channel_weights)
 
     def get_lambda(self, l0_norm):
-        if l0_norm <= 40:
+        l0_norm_threshold = 50
+        if self.dataset == "paviaU":
+            l0_norm_threshold = 40
+        if l0_norm <= l0_norm_threshold:
             return 0
         m = 0.01
         if self.dataset.get_name() == "paviaU":
