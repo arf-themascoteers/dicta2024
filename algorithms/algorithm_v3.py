@@ -155,7 +155,10 @@ class Algorithm_v3(Algorithm):
         return torch.norm(channel_weights, p=1) / torch.numel(channel_weights)
 
     def get_lambda(self, epoch):
-        return 0.2 * math.exp(-epoch / self.total_epoch)
+        m = 0.2
+        if self.dataset.get_name() == "paviaU":
+            m = 0.1
+        return m * math.exp(-epoch / self.total_epoch)
 
 
 
