@@ -35,7 +35,7 @@ COLORS = {
     "pcal": "#9467bd",
     "v1": "#7FFF00",
     "v2": "#FF00FF",
-    "v3": "#d62728",
+    "v3": "#1607F8",
 
 }
 
@@ -302,7 +302,7 @@ def get_summaries_rec(d):
 
 if __name__ == "__main__":
     plot_ablation(
-        get_summaries_rec("8_7")
+        get_summaries_rec("results") + get_summaries_rec("10_7")
         ,
-        include=["pcal","mcuve","bsnet","v0","v1","v2","v3"]
+        include=["v0","v1","v2","v6","v3"]
     )
