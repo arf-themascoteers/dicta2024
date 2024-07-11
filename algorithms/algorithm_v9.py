@@ -25,6 +25,9 @@ class Sparse(nn.Module):
         end = 500
         minimum = 0
 
+        if self.dataset == "indian_pines":
+            l0_norm_threshold = 50
+
         if l0_norm <= l0_norm_threshold:
             return self.last_k
 
@@ -175,11 +178,15 @@ class Algorithm_v9(Algorithm):
 
     def get_lambda(self, l0_norm):
         l0_norm_threshold = 40
+        if self.dataset == "indian_pines":
+            l0_norm_threshold = 50
         if l0_norm <= l0_norm_threshold:
             return 0
         m = 0.001
         if self.dataset.get_name() == "salinas":
             m = 0.08
+        elif self.dataset.get_name() == "indian_pines":
+            m = 0.01
         return m
 
 
