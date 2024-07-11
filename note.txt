@@ -1,35 +1,10 @@
-algorithm 6
--- high k early sparsity
-
-algorithm 7 (5.5)
-=================
-
-def get_k(self, epoch, target_size):
-
-if target_size <=15
-	return value(epoch, targetsize)
-		#lower target - higher value
-
-
-v3 (good - late sparse)
-v4 - no sparse
-v5 - target size based
-v6 - early sparse
-v7 - target and epoch - target size value based
-
-
-
-dicta2024 - v5
-dicta2 - v4
-dicta3 - v3 pavia
-dicta4 - v7
-
-
-done:
-1. early sparse (v6)
-2. target epoch based (v7)
-3. target based (v5)
-
-writing:
-
-mean back prop other weights
+v0
+	fc
+v1
+	aggregated and full batch (adjust l1, k)
+v2
+	remove sigmoid - no sparsity (adjust l1, k=0)
+v6
+	dynamic sparsity, fixed l1 based on l0-norm
+v3
+	
