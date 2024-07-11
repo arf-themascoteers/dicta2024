@@ -178,6 +178,8 @@ class Algorithm_v9(Algorithm):
         if l0_norm <= l0_norm_threshold:
             return 0
         m = 0.001
+        if self.dataset.get_name() == "salinas":
+            m = 0.08
         return m
 
 
