@@ -9,7 +9,7 @@ data = data.iloc[0:4, :]
 batches = data.iloc[:, 0]
 weights = data.iloc[:, 1:]
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(6, 3))
 
 bar_width = 0.2
 index = range(len(batches))
@@ -17,8 +17,8 @@ index = range(len(batches))
 for i, weight in enumerate(weights.columns):
     ax.bar([x + i * bar_width for x in index], weights[weight], bar_width, label=f'Mean weight for band {i+1}')
 
-ax.set_xlabel('Batch')
-ax.set_ylabel('Mean weight')
+ax.set_xlabel('Batch',fontsize=16)
+ax.set_ylabel('Mean weight',fontsize=16)
 ax.set_xticks([x + bar_width for x in index])
 ax.set_xticklabels(batches)
 ax.legend()

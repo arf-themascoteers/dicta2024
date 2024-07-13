@@ -5,11 +5,11 @@ import os
 
 ALGS = {
     "v0": "BS-Net-Classifier [12]",
-    "v9": "Proposed Algorithm",
     "all": "All Bands",
-    "mcuve": "MCUVE [19]",
-    "bsnet": "BS-Net-FC [5]",
-    "pcal": "PCA-loading [20]",
+    "v1": "V1: BS-Net-Classifier [12] + FCNN",
+    "v2": "V2: V1 + improved aggregation",
+    "v6": "V3: V2 + absolute value activation (no sparse constraint)",
+    "v9": "V4: V3 + dynamic sparse constraint (proposed algorithm)",
 }
 
 DSS = {
@@ -27,6 +27,7 @@ COLORS = {
     "pcal": "#9467bd",
     "v1": "#7FFF00",
     "v2": "#FF00FF",
+    "v6": "#9467bd",
     "v9": "#d62728",
 
 }
@@ -39,6 +40,7 @@ def sanitize_df(df):
         df['time'] = 0
         df['selected_features'] = ''
     return df
+
 
 def plot_ablation_oak(source, exclude=None, include=None, out_file="ab.png"):
     for d in DSS:
@@ -60,7 +62,7 @@ def plot_ablation_oak(source, exclude=None, include=None, out_file="ab.png"):
         colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22",
                   "#17becf"]
         markers = ['s', 'P', 'D', '^', 'o', '*', '.','s', 'P', 'D', '^', 'o', '*', '.']
-        labels = ["OA", "AA", r"$\kappa$"]
+        labels = ["Overall Accuracy (OA)", "Average Accuracy (AA)", r"Cohen's kappa ($\kappa$)"]
 
         min_lim = 0.3
         max_lim = 1
@@ -83,7 +85,7 @@ def plot_ablation_oak(source, exclude=None, include=None, out_file="ab.png"):
         max_lim = max(df["oa"].max(), df["aa"].max(), df["k"].max()) + 0.02
         print(min_lim, max_lim)
         dest = os.path.join("saved_figs", f"{d}_{out_file}")
-        fig, axes = plt.subplots(ncols=3, figsize=(18, 4))
+        fig, axes = plt.subplots(ncols=3, figsize=(18, 10))
         for metric_index, metric in enumerate(["oa", "aa", "k"]):
             algorithm_counter = 0
             for algorithm_index, algorithm in enumerate(include):
@@ -124,9 +126,9 @@ def plot_ablation_oak(source, exclude=None, include=None, out_file="ab.png"):
             axes[metric_index].tick_params(axis='both', which='major', labelsize=14)
 
             if metric_index == 0:
-                legend = axes[metric_index].legend(loc='upper left', fontsize=18, ncols=3,
-                                                   bbox_to_anchor=(0, 1.5),
-                                                   columnspacing=8.0, frameon=True
+                legend = axes[metric_index].legend(title="Algorithms", loc='upper left', fontsize=18, ncols=2,
+                                                   bbox_to_anchor=(0, 1.4),
+                                                   columnspacing=1.0, frameon=True
                                                    )
             legend.get_title().set_fontsize('18')
             legend.get_title().set_fontweight('bold')
@@ -134,41 +136,20 @@ def plot_ablation_oak(source, exclude=None, include=None, out_file="ab.png"):
             axes[metric_index].grid(True, linestyle='-', alpha=0.6)
 
         #fig.text(0.5, 0.05, f"{dataset_label}", fontsize=22, ha='center')
-        fig.subplots_adjust(wspace=0.3, top=0.7, bottom=0.2)
-
+        fig.subplots_adjust(wspace=0.4, top=0.7, bottom=0.2)
+        #plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
         # plt.tight_layout()
         # fig.subplots_adjust(wspace=0.4)
         plt.savefig(dest, bbox_inches='tight', pad_inches=0.05)
         plt.close(fig)
 
-def plot_saved(exclude=None):
-    files = []
-    for d in os.listdir("saved_results"):
-        dpath = os.path.join("saved_results",d)
-        for f in os.listdir(dpath):
-            if f.endswith("_summary.csv") and not f.startswith("all_"):
-                fpath = os.path.join("saved_results",d,f)
-                files.append(fpath)
-    plot_oak(files, exclude)
 
-
-def plot_baseline(source,exclude=None, include=None):
-    if exclude is None:
-        exclude = []
-    if include is None:
-        include = []
-    exclude = exclude + ["v1","v2","v3"]
-    plot_oak(source,
-         exclude=exclude,
-         out_file = "baseline.png",
-         include=include
-    )
 
 def plot_ablation(source, include = None):
     if include is None:
         include = []
     plot_ablation_oak(source,
-         out_file = "baseline.png",
+         out_file = "ablation.png",
          include=include
     )
 
@@ -195,5 +176,5 @@ if __name__ == "__main__":
     plot_ablation(
         get_summaries_rec("11_7")
         ,
-        include=["pcal","mcuve","bsnet","v0","v9","all"]
+        include=["v0","v1","v2","v6","v9","all"]
     )

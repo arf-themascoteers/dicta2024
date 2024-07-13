@@ -13,9 +13,9 @@ ALGS = {
 }
 
 DSS = {
-    "indian_pines" : "Indian Pines",
-    "paviaU" : "Pavia University",
-    "salinas" : "Salinas",
+    "indian_pines": "Indian Pines",
+    "paviaU": "Pavia University",
+    "salinas": "Salinas",
 }
 
 COLORS = {
@@ -28,7 +28,6 @@ COLORS = {
     "v1": "#7FFF00",
     "v2": "#FF00FF",
     "v9": "#d62728",
-
 }
 
 
@@ -40,26 +39,28 @@ def sanitize_df(df):
         df['selected_features'] = ''
     return df
 
-def plot_ablation_oak(source, exclude=None, include=None, out_file="ab.png"):
-    for d in DSS:
+
+def plot_combined(source, exclude=None, include=None, out_file="combined_plot.png"):
+    fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(18, 12))
+
+    subplot_labels = ["(a)", "(b)", "(c)", "(d)", "(e)", "(f)", "(g)", "(h)", "(i)"]
+
+    for row_idx, d in enumerate(DSS):
         if exclude is None:
             exclude = []
-        os.makedirs("saved_figs", exist_ok=True)
         if isinstance(source, str):
             df = sanitize_df(pd.read_csv(source))
         else:
             df = [sanitize_df(pd.read_csv(loc)) for loc in source]
-            df = [d for d in df if len(d)!=0]
+            df = [d for d in df if len(d) != 0]
             df = pd.concat(df, axis=0, ignore_index=True)
-
 
         df = df[df["dataset"] == d]
         if len(df) == 0:
             continue
-        df.to_csv(os.path.join("saved_figs", "source.split.csv"), index=False)
         colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22",
                   "#17becf"]
-        markers = ['s', 'P', 'D', '^', 'o', '*', '.','s', 'P', 'D', '^', 'o', '*', '.']
+        markers = ['s', 'P', 'D', '^', 'o', '*', '.', 's', 'P', 'D', '^', 'o', '*', '.']
         labels = ["OA", "AA", r"$\kappa$"]
 
         min_lim = 0.3
@@ -81,9 +82,7 @@ def plot_ablation_oak(source, exclude=None, include=None, out_file="ab.png"):
             df = df[df["algorithm"].isin(include)]
         min_lim = min(df["oa"].min(), df["aa"].min(), df["k"].min()) - 0.02
         max_lim = max(df["oa"].max(), df["aa"].max(), df["k"].max()) + 0.02
-        print(min_lim, max_lim)
-        dest = os.path.join("saved_figs", f"{d}_{out_file}")
-        fig, axes = plt.subplots(ncols=3, figsize=(18, 4))
+
         for metric_index, metric in enumerate(["oa", "aa", "k"]):
             algorithm_counter = 0
             for algorithm_index, algorithm in enumerate(include):
@@ -109,74 +108,36 @@ def plot_ablation_oak(source, exclude=None, include=None, out_file="ab.png"):
                     color = "#000000"
                     marker = None
                 else:
-                    algorithm_counter = algorithm_counter + 1
+                    algorithm_counter += 1
 
-                axes[metric_index].plot(alg_df['target_size'], alg_df[metric],
-                                        label=algorithm_label,
-                                        # marker=marker,
-                                        color=color,
-                                        fillstyle='none', markersize=7, linewidth=2, linestyle=linestyle
-                                        )
+                axes[row_idx, metric_index].plot(alg_df['target_size'], alg_df[metric],
+                                                 label=algorithm_label,
+                                                 color=color,
+                                                 fillstyle='none', markersize=7, linewidth=2, linestyle=linestyle)
 
-            axes[metric_index].set_xlabel('Target size', fontsize=18)
-            axes[metric_index].set_ylabel(labels[metric_index], fontsize=18)
-            axes[metric_index].set_ylim(min_lim, max_lim)
-            axes[metric_index].tick_params(axis='both', which='major', labelsize=14)
+            axes[row_idx, metric_index].set_xlabel('Target size', fontsize=18)
+            axes[row_idx, metric_index].set_ylabel(labels[metric_index], fontsize=18)
+            axes[row_idx, metric_index].set_ylim(min_lim, max_lim)
+            axes[row_idx, metric_index].tick_params(axis='both', which='major', labelsize=14)
+            axes[row_idx, metric_index].grid(True, linestyle='-', alpha=0.6)
 
-            if metric_index == 0:
-                legend = axes[metric_index].legend(loc='upper left', fontsize=18, ncols=3,
-                                                   bbox_to_anchor=(0, 1.5),
-                                                   columnspacing=8.0, frameon=True
-                                                   )
-            legend.get_title().set_fontsize('18')
-            legend.get_title().set_fontweight('bold')
+            if metric_index == 0 and row_idx == 0:
+                legend = axes[row_idx, metric_index].legend(loc='upper left', fontsize=12, ncols=6,
+                                                            bbox_to_anchor=(0, 1.25),
+                                                            columnspacing=3.8, frameon=True)
+                legend.get_title().set_fontsize('12')
+                legend.get_title().set_fontweight('bold')
 
-            axes[metric_index].grid(True, linestyle='-', alpha=0.6)
+            # Add subplot labels (a), (b), (c), etc. at the bottom
+            subplot_label = subplot_labels[row_idx * 3 + metric_index]
+            axes[row_idx, metric_index].text(0.5, -0.35, subplot_label,
+                                             transform=axes[row_idx, metric_index].transAxes,
+                                             fontsize=18, ha='center')
 
-        #fig.text(0.5, 0.05, f"{dataset_label}", fontsize=22, ha='center')
-        fig.subplots_adjust(wspace=0.3, top=0.7, bottom=0.2)
-
-        # plt.tight_layout()
-        # fig.subplots_adjust(wspace=0.4)
-        plt.savefig(dest, bbox_inches='tight', pad_inches=0.05)
-        plt.close(fig)
-
-def plot_saved(exclude=None):
-    files = []
-    for d in os.listdir("saved_results"):
-        dpath = os.path.join("saved_results",d)
-        for f in os.listdir(dpath):
-            if f.endswith("_summary.csv") and not f.startswith("all_"):
-                fpath = os.path.join("saved_results",d,f)
-                files.append(fpath)
-    plot_oak(files, exclude)
-
-
-def plot_baseline(source,exclude=None, include=None):
-    if exclude is None:
-        exclude = []
-    if include is None:
-        include = []
-    exclude = exclude + ["v1","v2","v3"]
-    plot_oak(source,
-         exclude=exclude,
-         out_file = "baseline.png",
-         include=include
-    )
-
-def plot_ablation(source, include = None):
-    if include is None:
-        include = []
-    plot_ablation_oak(source,
-         out_file = "baseline.png",
-         include=include
-    )
-
-
-def get_summaries(d):
-    files = os.listdir(d)
-    paths = [os.path.join(d, f) for f in files if f.endswith("_summary.csv")]
-    return paths
+    fig.tight_layout()
+    fig.subplots_adjust(wspace=0.3, hspace=0.5, top=0.95, bottom=0.15)
+    plt.savefig(out_file, bbox_inches='tight', pad_inches=0.05)
+    plt.close(fig)
 
 def get_summaries_rec(d):
     files = os.listdir(d)
@@ -190,10 +151,8 @@ def get_summaries_rec(d):
 
     return paths
 
-
 if __name__ == "__main__":
-    plot_ablation(
-        get_summaries_rec("11_7")
-        ,
-        include=["pcal","mcuve","bsnet","v0","v9","all"]
+    plot_combined(
+        get_summaries_rec("11_7"),
+        include=["pcal", "mcuve", "bsnet", "v0", "v9", "all"]
     )
