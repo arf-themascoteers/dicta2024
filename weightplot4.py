@@ -14,7 +14,7 @@ indices = list(range(0, len(data), 50))
 means_50 = means[indices]
 stds_50 = stds[indices]
 
-fig, ax = plt.subplots(figsize=(8, 4))
+fig, ax = plt.subplots(figsize=(12, 4))
 
 bar_width = 0.4
 x = np.arange(len(indices))
@@ -28,7 +28,7 @@ ax.set_xlabel('Training Iteration', fontsize=14)
 ax.set_ylabel('')
 fig.subplots_adjust(bottom=0.2)
 #fig.subplots_adjust(left=0, right=1, top=1, bottom=0.3)
-ax.legend(loc='upper center', bbox_to_anchor=(0.35, 1.15), ncol=2, frameon=True)
+ax.legend(loc='upper center', bbox_to_anchor=(0.335, 1.18), ncol=2, frameon=True, fontsize=14)
 
 os.makedirs("stored_figs", exist_ok=True)
 plt.savefig('stored_figs/weightplot_m_s.png')

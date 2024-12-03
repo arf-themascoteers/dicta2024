@@ -9,7 +9,7 @@ data = data.iloc[0:4, :]
 batches = data.iloc[:, 0]
 weights = data.iloc[:, 1:]
 
-fig, ax = plt.subplots(figsize=(6, 3))
+fig, ax = plt.subplots(figsize=(10, 3))
 
 bar_width = 0.2
 index = range(len(batches))

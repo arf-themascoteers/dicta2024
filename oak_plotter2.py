@@ -123,7 +123,7 @@ def plot_combined(source, exclude=None, include=None, out_file="combined_plot.pn
 
             if metric_index == 0 and row_idx == 0:
                 legend = axes[row_idx, metric_index].legend(loc='upper left', fontsize=12, ncols=6,
-                                                            bbox_to_anchor=(0, 1.25),
+                                                            bbox_to_anchor=(0, 1.3),
                                                             columnspacing=3.8, frameon=True)
                 legend.get_title().set_fontsize('12')
                 legend.get_title().set_fontweight('bold')
