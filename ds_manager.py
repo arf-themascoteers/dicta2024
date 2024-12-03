@@ -4,30 +4,16 @@ from sklearn.preprocessing import minmax_scale
 
 
 class DSManager:
-    def __init__(self, name, remove_bg=False, test=False):
+    def __init__(self, name, remove_bg=True, test=False):
         self.name = name
         self.test=test
         dataset_path = f"data/{name}.csv"
         df = pd.read_csv(dataset_path)
         df.iloc[:, :-1] = minmax_scale(df.iloc[:, :-1])
         self.data = df.to_numpy()
-        print(f"{self.name}: Total samples", len(self.data))
-        self.foreground_data = self.data[self.data[:, -1] != 0]
-        if remove_bg:
-            self.foreground_data[:, -1] = self.foreground_data[:, -1] - 1
-            self.data = self.foreground_data
-        self.bs_train = self.data
-
-        if self.test:
-            if self.get_name() != "indian_pines":
-                k = 0.2
-                if self.get_name() != "salinas":
-                    k = 0.1
-                self.bs_train, _ =  train_test_split(self.bs_train, train_size=k, random_state=40, stratify=self.bs_train[:, -1])
-                self.foreground_data, _ =  train_test_split(self.foreground_data, test_size=k,random_state=40, stratify=self.foreground_data[:, -1])
-
-        print(f"{self.name}: After background processing, Total bs train samples", len(self.bs_train))
-        print(f"{self.name}: After background processing, Total train-test samples", len(self.foreground_data))
+        self.bs_train = self.data[self.data[:, -1] != 0]
+        self.bs_train[:, -1] = self.bs_train[:, -1] - 1
+        print(f"{self.name}: Total bs train samples", len(self.bs_train))
 
     def get_name(self):
         return self.name
@@ -44,9 +30,6 @@ class DSManager:
     def get_train_y(self):
         return self.bs_train[:, -1]
 
-    def get_foreground_data(self):
-        return self.foreground_data
-
     def get_k_folds(self):
         folds = 20
         if self.test:
@@ -56,8 +39,8 @@ class DSManager:
             yield self.get_a_fold(seed)
 
     def get_a_fold(self, seed=50):
-        return train_test_split(self.foreground_data[:,0:-1], self.foreground_data[:,-1], test_size=0.95, random_state=seed,
-                         stratify=self.foreground_data[:, -1])
+        return train_test_split(self.bs_train[:,0:-1], self.bs_train[:,-1], test_size=0.95, random_state=seed,
+                         stratify=self.bs_train[:, -1])
 
     def __repr__(self):
         return self.get_name()
