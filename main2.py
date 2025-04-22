@@ -1,7 +1,7 @@
 from task_runner import TaskRunner
 
 if __name__ == '__main__':
-    tag = "bsnet_km"
+    tag = "bsnet_km2"
     tasks = {
         "algorithms" : ["bsnet_km"],
         "datasets": ["indian_pines"],
