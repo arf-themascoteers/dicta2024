@@ -11,7 +11,7 @@ import csv
 class Sparse(nn.Module):
     def __init__(self):
         super().__init__()
-        self.k = 0.1
+        self.k = 0
 
     def forward(self, X):
         X = torch.where(X < self.k, 0, X)
@@ -51,6 +51,7 @@ class ZhangNet(nn.Module):
 
     def forward(self, X):
         channel_weights = self.weighter(X)
+        channel_weights = torch.abs(channel_weights)
         sparse_weights = self.sparse(channel_weights)
         reweight_out = X * sparse_weights
         reweight_out = reweight_out.reshape(reweight_out.shape[0],1,reweight_out.shape[1])
@@ -101,11 +102,11 @@ class Algorithm_v11(Algorithm):
                 if batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,loss)
                 loss.backward()
-                grad_norm = self.zhangnet.weighter[2].weight.grad.norm(p=1)
+                grad_norm = torch.abs(self.zhangnet.weighter[2].weight.grad)
                 grad_norms.append(grad_norm)
                 optimizer.step()
 
-            grad_norms = torch.stack(grad_norms, dim=0)
+            grad_norms = torch.cat(grad_norms, dim=0)
             mean_grad = torch.mean(grad_norms)
             with open('v11_grad_norm.csv', mode='a', newline='') as file:
                 writer = csv.writer(file)
