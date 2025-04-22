@@ -9,57 +9,74 @@ import csv
 
 
 class Sparse(nn.Module):
-    def __init__(self):
+    def __init__(self, dataset):
         super().__init__()
-        self.k = 0.1
+        self.dataset = dataset
+        self.last_k = 0
 
-    def forward(self, X):
-        X = torch.where(X < self.k, 0, X)
+    def forward(self, X, epoch,l0_norm):
+        self.last_k = self.get_k(epoch,l0_norm)
+        X = torch.where(torch.abs(X) < self.last_k, 0, X)
         return X
+
+    def get_k(self, epoch,l0_norm):
+        l0_norm_threshold = 40
+        start = 250
+        maximum = 1
+        end = 500
+        minimum = 0
+
+        if self.dataset == "indian_pines":
+            l0_norm_threshold = 50
+
+        if l0_norm <= l0_norm_threshold:
+            return self.last_k
+
+
+        if epoch < start:
+            return minimum
+        elif epoch > end:
+            return maximum
+        else:
+            return (epoch - start) * (maximum / (end - start))
 
 
 class ZhangNet(nn.Module):
-    def __init__(self, bands, number_of_classes, last_layer_input):
+    def __init__(self, bands, number_of_classes, last_layer_input, dataset):
         super().__init__()
-        
+        self.dataset = dataset
         self.bands = bands
         self.number_of_classes = number_of_classes
         self.last_layer_input = last_layer_input
         self.weighter = nn.Sequential(
             nn.Linear(self.bands, 512),
             nn.ReLU(),
-            nn.Linear(512, self.bands),
-            nn.Sigmoid()
+            nn.Linear(512, self.bands)
         )
         self.classnet = nn.Sequential(
-            nn.Conv1d(1,16,kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm1d(16),
+            nn.Linear(self.bands, 300),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
-            nn.Conv1d(16, 8, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm1d(8),
+            nn.BatchNorm1d(300),
+            nn.Linear(300, 200),
             nn.ReLU(),
-            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
-            nn.Conv1d(8, 4, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm1d(4),
-            nn.MaxPool1d(kernel_size=2, stride=2, padding=0),
-            nn.Flatten(start_dim=1),
-            nn.Linear(last_layer_input,self.number_of_classes)
+            nn.BatchNorm1d(200),
+            nn.Linear(200, self.number_of_classes),
         )
-        self.sparse = Sparse()
+        self.sparse = Sparse(self.dataset)
         num_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
         print("Number of learnable parameters:", num_params)
 
-    def forward(self, X):
+    def forward(self, X, epoch, l0_norm):
         channel_weights = self.weighter(X)
-        sparse_weights = self.sparse(channel_weights)
+        channel_weights = torch.abs(channel_weights)
+        channel_weights = torch.mean(channel_weights, dim=0)
+        sparse_weights = self.sparse(channel_weights, epoch, l0_norm)
         reweight_out = X * sparse_weights
-        reweight_out = reweight_out.reshape(reweight_out.shape[0],1,reweight_out.shape[1])
         output = self.classnet(reweight_out)
         return channel_weights, sparse_weights, output
 
 
-class Algorithm_v0(Algorithm):
+class Algorithm_v10(Algorithm):
     def __init__(self, target_size:int, dataset, tag, reporter, verbose, test):
         super().__init__(target_size, dataset, tag, reporter, verbose, test)
         self.criterion = torch.nn.CrossEntropyLoss()
@@ -67,7 +84,8 @@ class Algorithm_v0(Algorithm):
         self.last_layer_input = 100
         if self.dataset.name == "paviaU":
             self.last_layer_input = 48
-        self.zhangnet = ZhangNet(self.dataset.get_train_x().shape[1], self.class_size, self.last_layer_input).to(self.device)
+        self.zhangnet = ZhangNet(self.dataset.get_train_x().shape[1], self.class_size, self.last_layer_input,
+                                 self.dataset.get_name()).to(self.device)
         self.total_epoch = 500
         self.epoch = -1
         self.X_train = torch.tensor(self.dataset.get_train_x(), dtype=torch.float32).to(self.device)
@@ -76,18 +94,23 @@ class Algorithm_v0(Algorithm):
     def get_selected_indices(self):
         optimizer = torch.optim.Adam(self.zhangnet.parameters(), lr=0.001, betas=(0.9,0.999))
         dataset = TensorDataset(self.X_train, self.y_train)
-        dataloader = DataLoader(dataset, batch_size=128, shuffle=True)
+        dataloader = DataLoader(dataset, batch_size=12800000, shuffle=True)
         channel_weights = None
         loss = 0
         l1_loss = 0
         mse_loss = 0
-
+        l0_norm = self.X_train.shape[1]
+        sparse_weights = None
+        grad_norms = []
         for epoch in range(self.total_epoch):
             self.epoch = epoch
-            grad_norms = []
             for batch_idx, (X, y) in enumerate(dataloader):
                 optimizer.zero_grad()
-                channel_weights, sparse_weights, y_hat = self.zhangnet(X)
+                if sparse_weights is None:
+                    l0_norm = self.X_train.shape[1]
+                else:
+                    l0_norm = torch.norm(sparse_weights, p=0).item()
+                channel_weights, sparse_weights, y_hat = self.zhangnet(X, epoch,l0_norm)
                 deciding_weights = channel_weights
                 mean_weight, all_bands, selected_bands = self.get_indices(deciding_weights)
                 self.set_all_indices(all_bands)
@@ -97,7 +120,7 @@ class Algorithm_v0(Algorithm):
                 y = y.type(torch.LongTensor).to(self.device)
                 mse_loss = self.criterion(y_hat, y)
                 l1_loss = self.l1_loss(channel_weights)
-                lambda_value = self.get_lambda(epoch+1)
+                lambda_value = self.get_lambda(l0_norm)
                 loss = mse_loss + lambda_value*l1_loss
                 if batch_idx == 0 and self.epoch%10 == 0:
                     self.report_stats(channel_weights, sparse_weights, epoch, mse_loss, l1_loss.item(), lambda_value,loss)
@@ -111,7 +134,6 @@ class Algorithm_v0(Algorithm):
             with open('v0_grad_norm.csv', mode='a', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow([mean_grad.item()])
-
 
         print(self.get_name(),"selected bands and weights:")
         print("".join([str(i).ljust(10) for i in self.selected_indices]))
@@ -156,7 +178,7 @@ class Algorithm_v0(Algorithm):
 
         corrected_weights = mean_weights
         if torch.any(corrected_weights < 0):
-            corrected_weights = torch.abs(corrected_weights)
+            corrected_weights = torch.sigmoid(corrected_weights)
 
         band_indx = (torch.argsort(corrected_weights, descending=True)).tolist()
         return mean_weights, band_indx, band_indx[: self.target_size]
@@ -164,8 +186,18 @@ class Algorithm_v0(Algorithm):
     def l1_loss(self, channel_weights):
         return torch.norm(channel_weights, p=1) / torch.numel(channel_weights)
 
-    def get_lambda(self, epoch):
-        return 0.0001 * math.exp(-epoch/self.total_epoch)
+    def get_lambda(self, l0_norm):
+        l0_norm_threshold = 40
+        if self.dataset == "indian_pines":
+            l0_norm_threshold = 50
+        if l0_norm <= l0_norm_threshold:
+            return 0
+        m = 0.001
+        if self.dataset.get_name() == "salinas":
+            m = 0.08
+        elif self.dataset.get_name() == "indian_pines":
+            m = 0.01
+        return m
 
 
 

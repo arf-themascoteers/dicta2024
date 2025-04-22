@@ -38,12 +38,12 @@ class Algorithm_bsnet_km(Algorithm):
         optimizer = torch.optim.Adam(self.bsnet.parameters(), lr=0.001)
         X_train = self.X_train
         dataset = TensorDataset(X_train, X_train)
-        dataloader = DataLoader(dataset, batch_size=5000, shuffle=True)
+        dataloader = DataLoader(dataset, batch_size=50000, shuffle=True)
         channel_weights = None
         loss = 0
         l1_loss = 0
         mse_loss = 0
-        for epoch in range(10):
+        for epoch in range(50):
             self.epoch = epoch
             for batch_idx, (X, y) in enumerate(dataloader):
                 optimizer.zero_grad()

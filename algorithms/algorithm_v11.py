@@ -28,8 +28,7 @@ class ZhangNet(nn.Module):
         self.weighter = nn.Sequential(
             nn.Linear(self.bands, 512),
             nn.ReLU(),
-            nn.Linear(512, self.bands),
-            nn.Sigmoid()
+            nn.Linear(512, self.bands)
         )
         self.classnet = nn.Sequential(
             nn.Conv1d(1,16,kernel_size=3, stride=1, padding=1),
@@ -59,7 +58,7 @@ class ZhangNet(nn.Module):
         return channel_weights, sparse_weights, output
 
 
-class Algorithm_v0(Algorithm):
+class Algorithm_v11(Algorithm):
     def __init__(self, target_size:int, dataset, tag, reporter, verbose, test):
         super().__init__(target_size, dataset, tag, reporter, verbose, test)
         self.criterion = torch.nn.CrossEntropyLoss()
@@ -108,7 +107,7 @@ class Algorithm_v0(Algorithm):
 
             grad_norms = torch.stack(grad_norms, dim=0)
             mean_grad = torch.mean(grad_norms)
-            with open('v0_grad_norm.csv', mode='a', newline='') as file:
+            with open('v11_grad_norm.csv', mode='a', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow([mean_grad.item()])
 
