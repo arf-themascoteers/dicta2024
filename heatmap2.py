@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from matplotlib.patches import Patch
 
-df = pd.read_csv("results/v12_ds_v12_ds_indian_pines_30.csv")
+df = pd.read_csv("back_results/v12_ds_v12_ds_indian_pines_30.csv")
 array = df.filter(regex='^weight_').to_numpy()
 
 array[array>0]=1
